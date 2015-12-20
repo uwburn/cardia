@@ -1,0 +1,4 @@
+Concept by Valentina Bordin, development by Michele Tibaldi.
+
+Cardia is the first Heart Rate Monitor designed for gaming and broadcasting: it will display your current heart rate and generates a simulated ECG tracing, perfect for adding an original touch to gaming videos and livestreams.
+But the main feature is the multiplayer support: if you and your friends have the right setup you can connect and share your vitals, allowing a co-op experience like never before.

@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BC11D46B-F348-4642-90B8-576632E2583B}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MGT.Cardia</RootNamespace>
+    <AssemblyName>Cardia</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MGT Utilities, Version=1.0.5832.40131, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\MGT Utilities\MGT Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Model\HRMAlarm.cs" />
+    <Compile Include="View\AboutFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\AboutFrm.Designer.cs">
+      <DependentUpon>AboutFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utils\AssemblyAttributes.cs" />
+    <Compile Include="PresentationModel\Cardia.cs" />
+    <Compile Include="Utils\Configuration.cs" />
+    <Compile Include="View\AlarmFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\AlarmFrm.Designer.cs">
+      <DependentUpon>AlarmFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\CardiaFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\CardiaFrm.Designer.cs">
+      <DependentUpon>CardiaFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ECGDisplay.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ECGDisplay.Designer.cs">
+      <DependentUpon>ECGDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\HRMStatus.cs" />
+    <Compile Include="View\CMS50Frm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\CMS50Frm.Designer.cs">
+      <DependentUpon>CMS50Frm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\ECGSound.cs" />
+    <Compile Include="View\LogFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\LogFrm.Designer.cs">
+      <DependentUpon>LogFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="View\HRMEmulatorFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\HRMEmulatorFrm.Designer.cs">
+      <DependentUpon>HRMEmulatorFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Model\HeartRateMessage.cs" />
+    <Compile Include="View\HRMDeviceFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\NetworkFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\NetworkFrm.Designer.cs">
+      <DependentUpon>NetworkFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PresentationModel\NetworkSampler.cs" />
+    <Compile Include="View\ZephyrHxMFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="View\ZephyrHxMFrm.Designer.cs">
+      <DependentUpon>ZephyrHxMFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="View\AboutFrm.resx">
+      <DependentUpon>AboutFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\AlarmFrm.resx">
+      <DependentUpon>AlarmFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\CardiaFrm.resx">
+      <DependentUpon>CardiaFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ECGDisplay.resx">
+      <DependentUpon>ECGDisplay.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\CMS50Frm.resx">
+      <DependentUpon>CMS50Frm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\LogFrm.resx">
+      <DependentUpon>LogFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\HRMEmulatorFrm.resx">
+      <DependentUpon>HRMEmulatorFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\NetworkFrm.resx">
+      <DependentUpon>NetworkFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="View\ZephyrHxMFrm.resx">
+      <DependentUpon>ZephyrHxMFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon.ico" />
+    <None Include="Resources\Alarm1.wav" />
+    <None Include="Resources\Alarm2.wav" />
+    <None Include="Resources\Alarm3.wav" />
+    <None Include="Resources\Alarm4.wav" />
+    <None Include="Resources\Alarm5.wav" />
+    <None Include="Resources\Alarm6.wav" />
+    <None Include="Resources\Alarm7.wav" />
+    <None Include="Resources\Alarm8.wav" />
+    <None Include="Resources\Alarm9.wav" />
+    <None Include="Resources\Alarm10.wav" />
+    <None Include="Resources\Beep10.wav" />
+    <None Include="Resources\Beep9.wav" />
+    <None Include="Resources\Beep8.wav" />
+    <None Include="Resources\Beep7.wav" />
+    <None Include="Resources\Beep6.wav" />
+    <None Include="Resources\Beep5.wav" />
+    <None Include="Resources\Beep4.wav" />
+    <None Include="Resources\Beep3.wav" />
+    <None Include="Resources\Beep2.wav" />
+    <None Include="Resources\Beep1.wav" />
+    <None Include="Resources\Description.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ECG Signal Generator\ECG Signal Generator.csproj">
+      <Project>{E0AADDAD-DE3E-4F01-BC4E-B5E8D1F4CA21}</Project>
+      <Name>ECG Signal Generator</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HRM\HRM.csproj">
+      <Project>{A00C0BEB-9984-49EF-BA41-0C3B6772F42D}</Project>
+      <Name>HRM</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
