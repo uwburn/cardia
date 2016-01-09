@@ -17,6 +17,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using MGT.Utilities.EventHandlers;
 using MGT.HRM.CMS50;
+using MGT.HRM.HRP;
 
 namespace MGT.Cardia
 {
@@ -141,6 +142,11 @@ namespace MGT.Cardia
             else if (device is CMS50)
             {
                 if (!InitializeCMS50Panel())
+                    return;
+            }
+            else if (device is BtHrp)
+            {
+                if (!InitializeBtHrpPanel())
                     return;
             }
             else if (device is HRMEmulator)
@@ -551,6 +557,15 @@ namespace MGT.Cardia
             CMS50 cms50 = (CMS50)cardia.HRM;
 
             devicePanel = new CMS50Frm(cardia);
+
+            return true;
+        }
+
+        private bool InitializeBtHrpPanel()
+        {
+            BtHrp btHrp = (BtHrp)cardia.HRM;
+
+            devicePanel = new BtHrpFrm(cardia);
 
             return true;
         }

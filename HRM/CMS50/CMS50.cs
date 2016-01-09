@@ -157,7 +157,7 @@ namespace MGT.HRM.CMS50
                 catch
                 {
                     FireTimeout("CMS50 not transmitting on serial port " + serialPort.PortName);
-                    throw new Exception("CMS50 not transmitting on serial port " + serialPort.PortName);
+                    //throw new Exception("CMS50 not transmitting on serial port " + serialPort.PortName);
                 }
                 timeoutTimer.Start();
                 Running = true;

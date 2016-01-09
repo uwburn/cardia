@@ -157,7 +157,7 @@ namespace MGT.HRM.Zephyr_HxM
                 catch
                 {
                     FireTimeout("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
-                    throw new Exception("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
+                    //throw new Exception("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
                 }
                 timeoutTimer.Start();
                 Running = true;
