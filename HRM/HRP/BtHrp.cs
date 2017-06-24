@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
@@ -36,7 +37,7 @@ namespace MGT.HRM.HRP
 
         private static TimeSpan START_TIMEOUT = new TimeSpan(0, 0, 10);
         private static TimeSpan RUN_TIMEOUT = new TimeSpan(0, 0, 30);
-        private Timer timeoutTimer = new Timer(1000);
+        private System.Timers.Timer timeoutTimer = new System.Timers.Timer(1000);
         private DateTime lastReceivedDate;
 
         public BtHrp()
@@ -113,7 +114,10 @@ namespace MGT.HRM.HRP
 
                 deviceContainerId = "{" + device.Properties["System.Devices.ContainerId"] + "}";
 
-                if (backup.Equals(value))
+                if (backup == null && value == null)
+                    return;
+
+                if ((backup == null && value != null) || !backup.Equals(value))
                     if (DeviceChanged != null)
                         DeviceChanged(this, value);
             }
@@ -134,12 +138,12 @@ namespace MGT.HRM.HRP
                 service = await GattDeviceService.FromIdAsync(device.Id);
                 if (service != null)
                 {
-                    await ConfigureServiceForNotificationsAsync();
+                    ConfigureServiceForNotificationsAsync();
                 }
                 else
                 {
                     FireTimeout("Bluetooth HRP device initialization failed");
-                    throw new Exception("Bluetooth HRP device initialization failed");
+                    //throw new Exception("Bluetooth HRP device initialization failed");
                 }
             }
             catch
@@ -149,49 +153,54 @@ namespace MGT.HRM.HRP
             Running = true;
         }
 
-        private async Task ConfigureServiceForNotificationsAsync()
+        private void ConfigureServiceForNotificationsAsync()
         {
-            try
+            new Thread(async () =>
             {
-                // Obtain the characteristic for which notifications are to be received
-                characteristic = service.GetCharacteristics(CHARACTERISTIC_UUID)[CHARACTERISTIC_INDEX];
-
-                // While encryption is not required by all devices, if encryption is supported by the device,
-                // it can be enabled by setting the ProtectionLevel property of the Characteristic object.
-                // All subsequent operations on the characteristic will work over an encrypted link.
-                characteristic.ProtectionLevel = GattProtectionLevel.EncryptionRequired;
-
-                // Register the event handler for receiving notifications
-                characteristic.ValueChanged += Characteristic_ValueChanged;
-
-                // In order to avoid unnecessary communication with the device, determine if the device is already 
-                // correctly configured to send notifications.
-                // By default ReadClientCharacteristicConfigurationDescriptorAsync will attempt to get the current
-                // value from the system cache and communication with the device is not typically required.
-                var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
-
-                if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) ||
-                    (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != CHARACTERISTIC_NOTIFICATION_TYPE))
+                Thread.CurrentThread.IsBackground = true;
+                try
                 {
-                    // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
-                    // when the Characteristic value changes
-                    GattCommunicationStatus status =
-                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-                        CHARACTERISTIC_NOTIFICATION_TYPE);
+                    // Obtain the characteristic for which notifications are to be received
+                    characteristic = service.GetCharacteristics(CHARACTERISTIC_UUID)[CHARACTERISTIC_INDEX];
 
-                    if (status == GattCommunicationStatus.Unreachable)
+                    // While encryption is not required by all devices, if encryption is supported by the device,
+                    // it can be enabled by setting the ProtectionLevel property of the Characteristic object.
+                    // All subsequent operations on the characteristic will work over an encrypted link.
+                    characteristic.ProtectionLevel = GattProtectionLevel.EncryptionRequired;
+
+                    // Register the event handler for receiving notifications
+                    Thread.Sleep(1000);
+                    characteristic.ValueChanged += Characteristic_ValueChanged;
+
+                    // In order to avoid unnecessary communication with the device, determine if the device is already 
+                    // correctly configured to send notifications.
+                    // By default ReadClientCharacteristicConfigurationDescriptorAsync will attempt to get the current
+                    // value from the system cache and communication with the device is not typically required.
+                    var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
+
+                    if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) ||
+                        (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != CHARACTERISTIC_NOTIFICATION_TYPE))
                     {
-                        // Register a PnpObjectWatcher to detect when a connection to the device is established,
-                        // such that the application can retry device configuration.
-                        StartDeviceConnectionWatcher();
+                        // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
+                        // when the Characteristic value changes
+                        GattCommunicationStatus status =
+                            await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                            CHARACTERISTIC_NOTIFICATION_TYPE);
+
+                        if (status == GattCommunicationStatus.Unreachable)
+                        {
+                            // Register a PnpObjectWatcher to detect when a connection to the device is established,
+                            // such that the application can retry device configuration.
+                            StartDeviceConnectionWatcher();
+                        }
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                FireTimeout("Bluetooth HRP device initialization failed");
-                throw new Exception("Bluetooth HRP device initialization failed");
-            }
+                catch (Exception e)
+                {
+                    FireTimeout("Bluetooth HRP device initialization failed");
+                    //throw new Exception("Bluetooth HRP device initialization failed");
+                }
+            }).Start();
         }
 
         private void Characteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
@@ -243,6 +252,8 @@ namespace MGT.HRM.HRP
 
             secondLastPacket = lastPacket;
             lastPacket = btHrpPacket;
+
+            ProcessPackets();
         }
 
         private void ProcessPackets()
@@ -357,6 +368,7 @@ namespace MGT.HRM.HRP
 
                 if (characteristic != null)
                 {
+                    characteristic.ValueChanged -= Characteristic_ValueChanged;
                     characteristic = null;
                 }
 
@@ -409,14 +421,6 @@ namespace MGT.HRM.HRP
                 watcher.Stop();
                 watcher = null;
             }
-        }
-
-        // Move this in the config form
-        public async void ListHRPDevices()
-        {
-            DeviceInformationCollection devices = await DeviceInformation.FindAllAsync(
-                GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.HeartRate),
-                new string[] { "System.Devices.ContainerId" });
         }
     }
 }

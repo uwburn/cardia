@@ -11,6 +11,7 @@ using MGT.HRM.HRP;
 using System.IO.Ports;
 using MGT.Utilities.EventHandlers;
 using Windows.Devices.Enumeration;
+using System.Diagnostics;
 
 namespace MGT.Cardia
 {
@@ -33,10 +34,7 @@ namespace MGT.Cardia
             cardia.PacketProcessed += cardia_OnPacketProcessed;
             btHrp.DeviceChanged += btHrp_DeviceChanged;
 
-            foreach (DeviceInformation device in devices)
-            {
-                cbDevices.Items.Add(device.Name);
-            }
+            cbDevices.DataSource = new BindingSource(devices, null);
 
             if (devices.Count > 0)
             {

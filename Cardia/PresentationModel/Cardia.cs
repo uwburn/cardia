@@ -17,6 +17,7 @@ using System.Timers;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Enumeration.Pnp;
+using System.Threading;
 
 namespace MGT.Cardia
 {
@@ -130,7 +131,29 @@ namespace MGT.Cardia
             var task = DeviceInformation.FindAllAsync(
                 GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.HeartRate),
                 new string[] { "System.Devices.ContainerId" });
-            BtSmartDevices = task.GetResults();
+
+            try
+            {
+                while(true) 
+                {
+                    Thread.Sleep(100);
+
+                    var status = task.Status;
+
+                    if (status == Windows.Foundation.AsyncStatus.Canceled || task.Status == Windows.Foundation.AsyncStatus.Error)
+                        return;
+
+                    if (status == Windows.Foundation.AsyncStatus.Completed)
+                    {
+                        BtSmartDevices = task.GetResults();
+                        return;
+                    }
+                }
+            }
+            finally
+            {
+                task.Close();
+            }
         }
 
         private void InitializeDevices()

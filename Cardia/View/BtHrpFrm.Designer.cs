@@ -83,6 +83,7 @@
             // 
             // cbDevices
             // 
+            this.cbDevices.DisplayMember = "Name";
             this.cbDevices.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbDevices.FormattingEnabled = true;
             this.cbDevices.Location = new System.Drawing.Point(93, 18);
