@@ -502,6 +502,8 @@ namespace MGT.Cardia
                             }
                         }
                     }
+                    ((BtHrp)hrm).CharacteristicIndex = configuration.Device.BtHrp.CharacteristicIndex;
+                    ((BtHrp)hrm).InitDelay = configuration.Device.BtHrp.InitDelay;
                     break;
                 case Configuration.DeviceConfiguration.DeviceType.HRMEmulator:
                     hrm = Devices[3];
@@ -674,6 +676,8 @@ namespace MGT.Cardia
                 configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.BtHrp;
                 if (((BtHrp)hrm).Device != null)
                     configuration.Device.BtHrp.DeviceId = ((BtHrp)hrm).Device.Id;
+                configuration.Device.BtHrp.CharacteristicIndex = ((BtHrp)hrm).CharacteristicIndex;
+                configuration.Device.BtHrp.InitDelay = ((BtHrp)hrm).InitDelay;
             }
             else if (hrm is HRMEmulator)
             {

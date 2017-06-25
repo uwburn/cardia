@@ -33,6 +33,8 @@ namespace MGT.Cardia
             cardia.Stopped += cardia_Stopped;
             cardia.PacketProcessed += cardia_OnPacketProcessed;
             btHrp.DeviceChanged += btHrp_DeviceChanged;
+            btHrp.CharacteristicIndexChanged += btHrp_CharacteristicIndexChanged;
+            btHrp.InitDelayChanged += btHrp_InitDelayChanged;
 
             cbDevices.DataSource = new BindingSource(devices, null);
 
@@ -54,26 +56,56 @@ namespace MGT.Cardia
                     cbDevices.SelectedItem = devices[0];
                 }
             }
+
+            nudCharacteristic.Value = btHrp.CharacteristicIndex;
+
+            nudInitDelay.Value = btHrp.InitDelay;
         }
 
         void cardia_Started(object sender)
         {
-            LockConfigurationUI();
+            if (this.IsHandleCreated)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    LockConfigurationUI();
+                });
+            }
+            else
+            {
+                LockConfigurationUI();
+            }
         }
 
         void cardia_Stopped(object sender)
         {
-            UnlockConfigurationUI();
+            if (this.IsHandleCreated)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    UnlockConfigurationUI();
+                    tbHeartRate.Text = string.Empty;
+                });
+            }
+            else
+            {
+                UnlockConfigurationUI();
+                tbHeartRate.Text = string.Empty;
+            }
         }
 
         public override void LockConfigurationUI()
         {
             cbDevices.Enabled = false;
+            nudCharacteristic.Enabled = false;
+            nudInitDelay.Enabled = false;
         }
 
         public override void UnlockConfigurationUI()
         {
             cbDevices.Enabled = true;
+            nudCharacteristic.Enabled = true;
+            nudInitDelay.Enabled = true;
         }
 
         public override void ResetUI()
@@ -109,6 +141,16 @@ namespace MGT.Cardia
             }
         }
 
+        void btHrp_CharacteristicIndexChanged(object sender, int characteristicIndex)
+        {
+            nudCharacteristic.Value = characteristicIndex;
+        }
+
+        void btHrp_InitDelayChanged(object sender, int delay)
+        {
+            nudInitDelay.Value = delay;
+        }
+
         private void cbDevices_SelectedIndexChanged(object sender, EventArgs e)
         {
             DeviceInformation device = (DeviceInformation)cbDevices.SelectedItem;
@@ -116,10 +158,21 @@ namespace MGT.Cardia
             btHrp.Device = device;
         }
 
+        private void nudCharacteristic_ValueChanged(object sender, EventArgs e)
+        {
+            btHrp.CharacteristicIndex = Decimal.ToInt32(nudCharacteristic.Value);
+        }
+
+        private void nudInitDelay_ValueChanged(object sender, EventArgs e)
+        {
+            btHrp.InitDelay = Decimal.ToInt32(nudInitDelay.Value);
+        }
+
         private void BtHrpFrm_FormClosing(object sender, FormClosingEventArgs e)
         {
             e.Cancel = true;
             this.Hide();
         }
+
     }
 }

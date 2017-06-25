@@ -127,6 +127,9 @@ namespace MGT.HRM.Zephyr_HxM
             }
             set
             {
+                if (Running)
+                    throw new Exception();
+
                 string backup = SerialPort;
 
                 serialPort = new SerialPort(value);

@@ -33,11 +33,17 @@
             this.gbDeviceStatus = new System.Windows.Forms.GroupBox();
             this.tbHeartRate = new System.Windows.Forms.TextBox();
             this.gbConfiguration = new System.Windows.Forms.GroupBox();
+            this.nudCharacteristic = new System.Windows.Forms.NumericUpDown();
+            this.lbCharacteristic = new System.Windows.Forms.Label();
             this.cbDevices = new System.Windows.Forms.ComboBox();
             this.lbDevices = new System.Windows.Forms.Label();
+            this.nudInitDelay = new System.Windows.Forms.NumericUpDown();
+            this.lbInitDelay = new System.Windows.Forms.Label();
             label21 = new System.Windows.Forms.Label();
             this.gbDeviceStatus.SuspendLayout();
             this.gbConfiguration.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCharacteristic)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudInitDelay)).BeginInit();
             this.SuspendLayout();
             // 
             // label21
@@ -53,7 +59,7 @@
             // 
             this.gbDeviceStatus.Controls.Add(label21);
             this.gbDeviceStatus.Controls.Add(this.tbHeartRate);
-            this.gbDeviceStatus.Location = new System.Drawing.Point(9, 62);
+            this.gbDeviceStatus.Location = new System.Drawing.Point(9, 116);
             this.gbDeviceStatus.Name = "gbDeviceStatus";
             this.gbDeviceStatus.Size = new System.Drawing.Size(341, 51);
             this.gbDeviceStatus.TabIndex = 96;
@@ -71,15 +77,41 @@
             // 
             // gbConfiguration
             // 
+            this.gbConfiguration.Controls.Add(this.lbInitDelay);
+            this.gbConfiguration.Controls.Add(this.nudInitDelay);
+            this.gbConfiguration.Controls.Add(this.nudCharacteristic);
+            this.gbConfiguration.Controls.Add(this.lbCharacteristic);
             this.gbConfiguration.Controls.Add(this.cbDevices);
             this.gbConfiguration.Controls.Add(this.lbDevices);
             this.gbConfiguration.Location = new System.Drawing.Point(9, 9);
             this.gbConfiguration.Margin = new System.Windows.Forms.Padding(0);
             this.gbConfiguration.Name = "gbConfiguration";
-            this.gbConfiguration.Size = new System.Drawing.Size(341, 50);
+            this.gbConfiguration.Size = new System.Drawing.Size(341, 104);
             this.gbConfiguration.TabIndex = 95;
             this.gbConfiguration.TabStop = false;
             this.gbConfiguration.Text = "Configuration";
+            // 
+            // nudCharacteristic
+            // 
+            this.nudCharacteristic.Location = new System.Drawing.Point(93, 45);
+            this.nudCharacteristic.Maximum = new decimal(new int[] {
+            16,
+            0,
+            0,
+            0});
+            this.nudCharacteristic.Name = "nudCharacteristic";
+            this.nudCharacteristic.Size = new System.Drawing.Size(236, 20);
+            this.nudCharacteristic.TabIndex = 13;
+            this.nudCharacteristic.ValueChanged += new System.EventHandler(this.nudCharacteristic_ValueChanged);
+            // 
+            // lbCharacteristic
+            // 
+            this.lbCharacteristic.Location = new System.Drawing.Point(6, 42);
+            this.lbCharacteristic.Name = "lbCharacteristic";
+            this.lbCharacteristic.Size = new System.Drawing.Size(81, 23);
+            this.lbCharacteristic.TabIndex = 12;
+            this.lbCharacteristic.Text = "Characteristic:";
+            this.lbCharacteristic.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // cbDevices
             // 
@@ -101,11 +133,33 @@
             this.lbDevices.Text = "Device:";
             this.lbDevices.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // nudInitDelay
+            // 
+            this.nudInitDelay.Location = new System.Drawing.Point(93, 71);
+            this.nudInitDelay.Maximum = new decimal(new int[] {
+            5000,
+            0,
+            0,
+            0});
+            this.nudInitDelay.Name = "nudInitDelay";
+            this.nudInitDelay.Size = new System.Drawing.Size(236, 20);
+            this.nudInitDelay.TabIndex = 14;
+            this.nudInitDelay.ValueChanged += new System.EventHandler(this.nudInitDelay_ValueChanged);
+            // 
+            // lbInitDelay
+            // 
+            this.lbInitDelay.Location = new System.Drawing.Point(6, 68);
+            this.lbInitDelay.Name = "lbInitDelay";
+            this.lbInitDelay.Size = new System.Drawing.Size(81, 23);
+            this.lbInitDelay.TabIndex = 15;
+            this.lbInitDelay.Text = "Initi delay:";
+            this.lbInitDelay.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // BtHrpFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(359, 123);
+            this.ClientSize = new System.Drawing.Size(359, 177);
             this.Controls.Add(this.gbDeviceStatus);
             this.Controls.Add(this.gbConfiguration);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -119,6 +173,8 @@
             this.gbDeviceStatus.ResumeLayout(false);
             this.gbDeviceStatus.PerformLayout();
             this.gbConfiguration.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.nudCharacteristic)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudInitDelay)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -130,6 +186,10 @@
         private System.Windows.Forms.GroupBox gbConfiguration;
         private System.Windows.Forms.ComboBox cbDevices;
         private System.Windows.Forms.Label lbDevices;
+        private System.Windows.Forms.NumericUpDown nudCharacteristic;
+        private System.Windows.Forms.Label lbCharacteristic;
+        private System.Windows.Forms.Label lbInitDelay;
+        private System.Windows.Forms.NumericUpDown nudInitDelay;
 
     }
 }

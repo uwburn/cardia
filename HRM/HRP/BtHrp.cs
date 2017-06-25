@@ -19,13 +19,61 @@ namespace MGT.HRM.HRP
 
         private GattDeviceService service;
         private GattCharacteristic characteristic;
-        private Guid CHARACTERISTIC_UUID = GattCharacteristicUuids.HeartRateMeasurement;
+        private PnpObjectWatcher watcher;
+        private const GattClientCharacteristicConfigurationDescriptorValue CHARACTERISTIC_NOTIFICATION_TYPE = GattClientCharacteristicConfigurationDescriptorValue.Notify;
         // Heart Rate devices typically have only one Heart Rate Measurement characteristic.
         // Make sure to check your device's documentation to find out how many characteristics your specific device has.
-        private const int CHARACTERISTIC_INDEX = 0;
-        private const GattClientCharacteristicConfigurationDescriptorValue CHARACTERISTIC_NOTIFICATION_TYPE = GattClientCharacteristicConfigurationDescriptorValue.Notify;
+        private int characteristicIndex = 0;
 
-        private PnpObjectWatcher watcher;
+        public delegate void CharacteristicIndexChangedEventHandler(object sender, int characteristicIndex);
+        public event CharacteristicIndexChangedEventHandler CharacteristicIndexChanged;
+
+        public int CharacteristicIndex
+        {
+            get
+            {
+                return characteristicIndex;
+            }
+            set
+            {
+                if (Running)
+                    throw new Exception();
+
+                int backup = characteristicIndex;
+
+                characteristicIndex = value;
+
+                if (backup != value)
+                    if (CharacteristicIndexChanged != null)
+                        CharacteristicIndexChanged(this, value);
+            }
+        }
+
+        private int initDelay = 500;
+
+        public delegate void InitDelayChangedEventHandler(object sender, int delay);
+        public event InitDelayChangedEventHandler InitDelayChanged;
+
+        public int InitDelay
+        {
+            get
+            {
+                return initDelay;
+            }
+            set
+            {
+                if (Running)
+                    throw new Exception();
+
+                int backup = initDelay;
+
+                initDelay = value;
+
+                if (backup != value)
+                    if (InitDelayChanged != null)
+                        InitDelayChanged(this, value);
+            }
+        }
 
         private const byte HEART_RATE_VALUE_FORMAT = 0x01;
         private const byte ENERGY_EXPANDED_STATUS = 0x08;
@@ -126,28 +174,14 @@ namespace MGT.HRM.HRP
         public delegate void DeviceChangedEventHandler(object sender, DeviceInformation device);
         public event DeviceChangedEventHandler DeviceChanged;
 
-        public override async void Start()
+        public override void Start()
         {
             if (Running)
                 return;
 
             lastReceivedDate = DateTime.Now;
 
-            try
-            {
-                service = await GattDeviceService.FromIdAsync(device.Id);
-                if (service != null)
-                {
-                    ConfigureServiceForNotificationsAsync();
-                }
-                else
-                {
-                    FireTimeout("Bluetooth HRP device initialization failed");
-                    //throw new Exception("Bluetooth HRP device initialization failed");
-                }
-            }
-            catch
-            { }
+            ConfigureServiceForNotificationsAsync();
 
             timeoutTimer.Start();
             Running = true;
@@ -160,8 +194,11 @@ namespace MGT.HRM.HRP
                 Thread.CurrentThread.IsBackground = true;
                 try
                 {
+                    service = await GattDeviceService.FromIdAsync(device.Id);
+                    Thread.Sleep(initDelay);
+
                     // Obtain the characteristic for which notifications are to be received
-                    characteristic = service.GetCharacteristics(CHARACTERISTIC_UUID)[CHARACTERISTIC_INDEX];
+                    characteristic = service.GetCharacteristics(GattCharacteristicUuids.HeartRateMeasurement)[characteristicIndex];
 
                     // While encryption is not required by all devices, if encryption is supported by the device,
                     // it can be enabled by setting the ProtectionLevel property of the Characteristic object.
@@ -169,7 +206,7 @@ namespace MGT.HRM.HRP
                     characteristic.ProtectionLevel = GattProtectionLevel.EncryptionRequired;
 
                     // Register the event handler for receiving notifications
-                    Thread.Sleep(1000);
+                    Thread.Sleep(initDelay);
                     characteristic.ValueChanged += Characteristic_ValueChanged;
 
                     // In order to avoid unnecessary communication with the device, determine if the device is already 
@@ -195,8 +232,9 @@ namespace MGT.HRM.HRP
                         }
                     }
                 }
-                catch (Exception e)
+                catch
                 {
+                    Stop();
                     FireTimeout("Bluetooth HRP device initialization failed");
                     //throw new Exception("Bluetooth HRP device initialization failed");
                 }
@@ -249,6 +287,8 @@ namespace MGT.HRM.HRP
                 ExpendedEnergy = expendedEnergyValue,
                 Timestamp = timestamp
             };
+
+            TotalPackets++;
 
             secondLastPacket = lastPacket;
             lastPacket = btHrpPacket;
@@ -352,19 +392,13 @@ namespace MGT.HRM.HRP
             }
         }
 
-        public override async void Stop()
+        public override void Stop()
         {
             if (Running)
             {
                 Running = false;
                 
                 timeoutTimer.Stop();
-
-                if (service != null)
-                {
-                    service.Dispose();
-                    service = null;
-                }
 
                 if (characteristic != null)
                 {
@@ -376,6 +410,12 @@ namespace MGT.HRM.HRP
                 {
                     watcher.Stop();
                     watcher = null;
+                }
+
+                if (service != null)
+                {
+                    service.Dispose();
+                    service = null;
                 }
 
                 DoReset();

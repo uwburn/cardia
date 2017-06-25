@@ -39,6 +39,8 @@ namespace MGT.Cardia
         public class BtHrpConfiguration
         {
             public string DeviceId = null;
+            public int CharacteristicIndex = 0;
+            public int InitDelay = 500;
         }
 
         public class HRMEmulatorConfiguration
