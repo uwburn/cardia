@@ -38,6 +38,9 @@
     <Reference Include="EPPlus">
       <HintPath>..\Dependencies\EPPlus\EPPlus.dll</HintPath>
     </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\Dependencies\Log4Net\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="MGT Utilities">
       <HintPath>..\Dependencies\MGT Utilities\MGT Utilities.dll</HintPath>
     </Reference>

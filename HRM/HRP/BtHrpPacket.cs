@@ -11,5 +11,11 @@ namespace MGT.HRM.HRP
         public bool HasExpendedEnergy { get; set; }
         public int ExpendedEnergy { get; set; }
         public DateTimeOffset Timestamp { get; set; }
+
+        public override string ToString()
+        {
+            return base.ToString() + "[ HeartRate = " + HeartRate + " ]";
+        }
+
     }
 }

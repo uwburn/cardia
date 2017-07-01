@@ -5,11 +5,14 @@ using System.Text;
 using System.Timers;
 using MGT.Utilities.EventHandlers;
 using OpenNETCF.IO.Ports;
+using log4net;
 
 namespace MGT.HRM.CMS50
 {
     public sealed class CMS50 : HeartRateMonitor
     {
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public override string Name { get { return "Contec CMS50"; } }
 
         private static TimeSpan START_TIMEOUT = new TimeSpan(0, 0, 5);
@@ -148,14 +151,22 @@ namespace MGT.HRM.CMS50
         {
             if (!Running)
             {
+#if DEBUG
+                logger.Debug("Starting CMS50");
+#endif
+
                 try
                 {
                     lastReceivedDate = DateTime.Now;
                     serialPort.Open();
                     serialPort.Write(new byte[] { 0 }, 0, 1);
                 }
-                catch
+                catch(Exception e)
                 {
+#if DEBUG
+                    logger.Warn("Error opening serial port or sending CMS50 init message", e);
+#endif
+
                     FireTimeout("CMS50 not transmitting on serial port " + serialPort.PortName);
                     //throw new Exception("CMS50 not transmitting on serial port " + serialPort.PortName);
                 }
@@ -175,6 +186,13 @@ namespace MGT.HRM.CMS50
             TimeSpan diff = DateTime.Now - lastReceivedDate;
             if (diff > timeout)
             {
+#if DEBUG
+                if (Running)
+                    logger.Debug("Communication timeout elapsed");
+                else
+                    logger.Debug("Start timeout elapsed");
+#endif
+
                 timeoutTimer.Stop();
                 Stop();
                 FireTimeout("CMS50 not transmitting on serial port " + serialPort.PortName);
@@ -185,6 +203,10 @@ namespace MGT.HRM.CMS50
         {
             if (Running)
             {
+#if DEBUG
+                logger.Debug("Stopping CMS50");
+#endif
+
                 Running = false;
                 serialPort.Close();
                 DoReset();
@@ -195,11 +217,19 @@ namespace MGT.HRM.CMS50
 
         public override void Reset()
         {
+#if DEBUG
+            logger.Debug("Resetting CMS50");
+#endif
+
             reset = true;
         }
 
         private void DoReset()
         {
+#if DEBUG
+            logger.Debug("Resetting counters");
+#endif
+
             TotalPackets = 0;
             CorruptedPackets = 0;
             HeartBeats = 0;
@@ -217,9 +247,17 @@ namespace MGT.HRM.CMS50
 
         void serialPort_ReceivedEvent(object sender, SerialReceivedEventArgs e)
         {
+#if DEBUG
+            logger.Debug("Serial port data received");
+#endif
+
             byte[] bytes = new byte[serialPort.BytesToRead];
 
             serialPort.Read(bytes, 0, bytes.Length);
+
+#if DEBUG
+            logger.Debug("Equeuing data = " + bytes);
+#endif
 
             foreach (byte b in bytes)
             {
@@ -231,12 +269,20 @@ namespace MGT.HRM.CMS50
 
         private void ResetPacketQueue()
         {
+#if DEBUG
+            logger.Debug("Resetting packet queue");
+#endif
+
             packetQueue.Clear();
             packetStarted = false;
         }
 
         private void StartPacketQueue()
         {
+#if DEBUG
+            logger.Debug("Starting packet queue");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
             packetStarted = true;
             TotalPackets++;
@@ -244,11 +290,19 @@ namespace MGT.HRM.CMS50
 
         private void BuildPacket()
         {
+#if DEBUG
+            logger.Debug("Building packet");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
         }
 
         private void ClosePacketQueue()
         {
+#if DEBUG
+            logger.Debug("Closing packet queue");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
 
             try
@@ -256,9 +310,17 @@ namespace MGT.HRM.CMS50
                 CMS50Packet cms50Packet = new CMS50Packet(packetQueue.ToArray());
                 secondLastPacket = lastPacket;
                 lastPacket = cms50Packet;
+
+#if DEBUG
+                logger.Debug("Constructed CMS50 packet = " + cms50Packet);
+#endif
             }
-            catch (CorruptedPacketExcpetion)
+            catch (CorruptedPacketExcpetion e)
             {
+#if DEBUG
+                logger.Debug("Packet construction failed, corrupted packet", e);
+#endif
+
                 CorruptedPackets++;
             }
 
@@ -274,6 +336,10 @@ namespace MGT.HRM.CMS50
 
         private void ProcessData()
         {
+#if DEBUG
+            logger.Debug("Processing data");
+#endif
+
             if (reset)
                 DoReset();
 
@@ -297,6 +363,10 @@ namespace MGT.HRM.CMS50
 
         private void ProcessPackets()
         {
+#if DEBUG
+            logger.Debug("Processing packets");
+#endif
+
             // Smoothed values computation
             if (heartRateSmoothing[0] == null)
             {
@@ -378,6 +448,9 @@ namespace MGT.HRM.CMS50
 
             lastReceivedDate = DateTime.Now;
 
+#if DEBUG
+            logger.Debug("Firing PacketProcessed event, packet = " + LastPacket);
+#endif
             PacketProcessedEventArgs args = new PacketProcessedEventArgs(LastPacket);
             base.FirePacketProcessed(args);
         }

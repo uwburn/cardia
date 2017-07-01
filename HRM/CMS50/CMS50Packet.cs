@@ -75,5 +75,10 @@ namespace MGT.HRM.CMS50
                 derivatedBPM = value;
             }
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + "[ HeartRate = " + HeartRate + " ]";
+        }
     }
 }
