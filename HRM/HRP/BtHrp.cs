@@ -177,7 +177,7 @@ namespace MGT.HRM.HRP
         public delegate void DeviceChangedEventHandler(object sender, DeviceInformation device);
         public event DeviceChangedEventHandler DeviceChanged;
 
-        public override void Start()
+        public override async void Start()
         {
             if (Running)
                 return;
@@ -188,98 +188,95 @@ namespace MGT.HRM.HRP
 
             lastReceivedDate = DateTime.Now;
 
-            ConfigureServiceForNotificationsAsync();
-
             timeoutTimer.Start();
             Running = true;
+
+            ConfigureServiceForNotificationsAsync();
         }
 
-        private void ConfigureServiceForNotificationsAsync()
-        {
-            new Thread(async () =>
+        private async void ConfigureServiceForNotificationsAsync()
+        {          
+            try
             {
-                Thread.CurrentThread.IsBackground = true;
-                try
+#if DEBUG
+                logger.Debug("Getting GattDeviceService " + device.Name + " with id " + device.Id);
+#endif
+                service = await GattDeviceService.FromIdAsync(device.Id);
+                if (initDelay > 0)
+                    await Task.Delay(initDelay);
+
+                // Obtain the characteristic for which notifications are to be received
+#if DEBUG
+                logger.Debug("Getting HeartRateMeasurement GattCharacteristic " + characteristicIndex);
+#endif
+                characteristic = service.GetCharacteristics(GattCharacteristicUuids.HeartRateMeasurement)[characteristicIndex];
+
+                // While encryption is not required by all devices, if encryption is supported by the device,
+                // it can be enabled by setting the ProtectionLevel property of the Characteristic object.
+                // All subsequent operations on the characteristic will work over an encrypted link.
+#if DEBUG
+                logger.Debug("Setting EncryptionRequired protection level on GattCharacteristic");
+#endif
+                characteristic.ProtectionLevel = GattProtectionLevel.EncryptionRequired;
+
+                // Register the event handler for receiving notifications
+                if (initDelay > 0)
+                    await Task.Delay(initDelay);
+#if DEBUG
+                logger.Debug("Registering event handler onction level on GattCharacteristic");
+#endif
+                characteristic.ValueChanged += Characteristic_ValueChanged;
+
+                // In order to avoid unnecessary communication with the device, determine if the device is already 
+                // correctly configured to send notifications.
+                // By default ReadClientCharacteristicConfigurationDescriptorAsync will attempt to get the current
+                // value from the system cache and communication with the device is not typically required.
+#if DEBUG
+                logger.Debug("Reading GattCharacteristic configuration descriptor");
+#endif
+                var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
+
+                if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) ||
+                    (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != CHARACTERISTIC_NOTIFICATION_TYPE))
                 {
+                    // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
+                    // when the Characteristic value changes
 #if DEBUG
-                    logger.Debug("Getting GattDeviceService " + device.Name + "with id " + device.Id);
+                    logger.Debug("Setting GattCharacteristic configuration descriptor to enable notifications");
 #endif
 
-                    service = await GattDeviceService.FromIdAsync(device.Id);
-                    Thread.Sleep(initDelay);
+                    GattCommunicationStatus status =
+                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                        CHARACTERISTIC_NOTIFICATION_TYPE);
 
-                    // Obtain the characteristic for which notifications are to be received
-#if DEBUG
-                    logger.Debug("Getting HeartRateMeasurement GattCharacteristic " + characteristicIndex);
-#endif
-                    characteristic = service.GetCharacteristics(GattCharacteristicUuids.HeartRateMeasurement)[characteristicIndex];
-
-                    // While encryption is not required by all devices, if encryption is supported by the device,
-                    // it can be enabled by setting the ProtectionLevel property of the Characteristic object.
-                    // All subsequent operations on the characteristic will work over an encrypted link.
-#if DEBUG
-                    logger.Debug("Setting EncryptionRequired protection level on GattCharacteristic");
-#endif
-                    characteristic.ProtectionLevel = GattProtectionLevel.EncryptionRequired;
-
-                    // Register the event handler for receiving notifications
-                    Thread.Sleep(initDelay);
-#if DEBUG
-                    logger.Debug("Registering event handler onction level on GattCharacteristic");
-#endif
-                    characteristic.ValueChanged += Characteristic_ValueChanged;
-
-                    // In order to avoid unnecessary communication with the device, determine if the device is already 
-                    // correctly configured to send notifications.
-                    // By default ReadClientCharacteristicConfigurationDescriptorAsync will attempt to get the current
-                    // value from the system cache and communication with the device is not typically required.
-#if DEBUG
-                    logger.Debug("Reading GattCharacteristic configuration descriptor");
-#endif
-                    var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
-
-                    if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) ||
-                        (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != CHARACTERISTIC_NOTIFICATION_TYPE))
-                    {
-                        // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
-                        // when the Characteristic value changes
-#if DEBUG
-                        logger.Debug("Setting GattCharacteristic configuration descriptor to enable notifications");
-#endif
-
-                        GattCommunicationStatus status =
-                            await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-                            CHARACTERISTIC_NOTIFICATION_TYPE);
-
-                        if (status == GattCommunicationStatus.Unreachable)
-                        {
-#if DEBUG
-                            logger.Debug("Device unreachable");
-#endif
-
-                            // Register a PnpObjectWatcher to detect when a connection to the device is established,
-                            // such that the application can retry device configuration.
-                            StartDeviceConnectionWatcher();
-                        }
-                    }
-                    else
+                    if (status == GattCommunicationStatus.Unreachable)
                     {
 #if DEBUG
-                        logger.Debug("Configuration successfull");
-#endif
-                    }
-                }
-                catch (Exception e)
-                {
-#if DEBUG
-                    logger.Warn("Error configuring HRP device", e);
+                        logger.Debug("Device unreachable");
 #endif
 
-                    Stop();
-                    FireTimeout("Bluetooth HRP device initialization failed");
-                    //throw new Exception("Bluetooth HRP device initialization failed");
+                        // Register a PnpObjectWatcher to detect when a connection to the device is established,
+                        // such that the application can retry device configuration.
+                        StartDeviceConnectionWatcher();
+                    }
                 }
-            }).Start();
+                else
+                {
+#if DEBUG
+                    logger.Debug("Configuration successfull");
+#endif
+                }
+            }
+            catch (Exception e)
+            {
+#if DEBUG
+                logger.Warn("Error configuring HRP device", e);
+#endif
+
+                Stop();
+                FireTimeout("Bluetooth HRP device initialization failed");
+                //throw new Exception("Bluetooth HRP device initialization failed");
+            }
         }
 
         private void Characteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
@@ -552,14 +549,9 @@ namespace MGT.HRM.HRP
 
         public override void Dispose()
         {
-            if (service != null)
-            {
-                service.Dispose();
-                service = null;
-            }
-
             if (characteristic != null)
             {
+                characteristic.ValueChanged -= Characteristic_ValueChanged;
                 characteristic = null;
             }
 
@@ -567,6 +559,12 @@ namespace MGT.HRM.HRP
             {
                 watcher.Stop();
                 watcher = null;
+            }
+
+            if (service != null)
+            {
+                service.Dispose();
+                service = null;
             }
         }
     }

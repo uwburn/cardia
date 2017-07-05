@@ -623,10 +623,13 @@ namespace MGT.Cardia
                 return;
             }
 
-            signalGenerator.Start();
+            if (hrm.Running)
+            {
+                signalGenerator.Start();
 
-            if (Started != null)
-                Started(this);
+                if (Started != null)
+                    Started(this);
+            }
         }
 
         public void Stop()
