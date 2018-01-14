@@ -1,9 +1,5 @@
 ﻿using log4net;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
@@ -427,6 +423,11 @@ namespace MGT.HRM.HRP
 #endif
 
             var connectedProperty = args.Properties["System.Devices.Connected"];
+
+#if DEBUG
+            logger.Debug("Connected property, args = " + connectedProperty.ToString());
+#endif
+
             bool isConnected = false;
             if ((deviceContainerId == args.Id) && Boolean.TryParse(connectedProperty.ToString(), out isConnected) &&
                 isConnected)

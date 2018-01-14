@@ -1,21 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.IO.Ports;
 using MGT.ECG_Signal_Generator;
-using System.Drawing.Drawing2D;
 using MGT.HRM.Emulator;
 using MGT.HRM;
 using MGT.HRM.Zephyr_HxM;
-using MGT.Utilities.Network;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using MGT.Utilities.EventHandlers;
 using MGT.HRM.CMS50;
 using MGT.HRM.HRP;
 
