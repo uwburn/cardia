@@ -45,7 +45,7 @@ namespace MGT.Cardia
 
         private void linkLabelWebsite_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            ProcessStartInfo sInfo = new ProcessStartInfo("http://www.altairgarden.it/");
+            ProcessStartInfo sInfo = new ProcessStartInfo("https://github.com/uwburn/cardia");
             Process.Start(sInfo);
         }
     }
