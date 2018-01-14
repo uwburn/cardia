@@ -87,7 +87,8 @@ Bluetooth Smart (also Bluetooth LE and Bluetooth 4.0) has been added into versio
 Some users reports issues about Bluetooth Smart compatibility, please ensure the following:
 * You must be runnning Windows 10 1709 or later (currently is the last one)
 * Your device must be paired before running Cardia
-If your device works ok, please post it out, this would be helpful!
+
+If your device works ok, please post it out [here](https://github.com/uwburn/cardia/issues/3) , this would be helpful!
 
 - - - -
 
