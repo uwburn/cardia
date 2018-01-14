@@ -1,3 +1,5 @@
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NYEKDVZMWSLJG)
+
 # Cardia
 ## Heart rate monitoring client for gamers
 
@@ -89,6 +91,13 @@ The idea behind this project evolved as the work on it progressed. We started on
 On a programmer side, i used this project to explore a clear separation of the various components and i went after a MVVM approach built upon Windows Forms, using extensively events. Also, the network code, while simplicistic, was interesting to work on.
 
 Now, about two years after i started working on it, looking back at the code it seems a bit messy in some parts, so if you're trying to contribute i apologize for it. Also, sorry for not using a dependency manager. I'm much more a Java guy (and i would not start a project without Maven there), so i didn't know what to use and just copied the DLLs. Should not be a great problem since there's only 3. 
+
+- - - -
+
+### Donations
+If you would like to support me and help me buy the devices to include support for Bluetooth Smart, please consider making a donation on my PayPal account using the button below.
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=NYEKDVZMWSLJG)
 
 - - - -
 
