@@ -5,7 +5,6 @@ using System.Text;
 using MGT.HRM.Emulator;
 using MGT.ECG_Signal_Generator;
 using MGT.HRM.Zephyr_HxM;
-using MGT.HRM.HRP;
 using MGT.HRM;
 using MGT.Utilities.Network;
 using System.Collections.Concurrent;
@@ -13,10 +12,6 @@ using System.Drawing;
 using System.IO.Ports;
 using MGT.Utilities.EventHandlers;
 using MGT.HRM.CMS50;
-using System.Timers;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Devices.Enumeration;
-using Windows.Devices.Enumeration.Pnp;
 using System.Threading;
 
 namespace MGT.Cardia
@@ -41,7 +36,6 @@ namespace MGT.Cardia
             alarm.AlarmChanged += alarm_AlarmChanged;
 
             InitializeSerialPorts();
-            InitializeBtDevices();
             InitializeDevices();
             InitializeLoggers();
             InitializeNetworkProvider();
@@ -66,7 +60,6 @@ namespace MGT.Cardia
 
         // Properties
         public List<string> SerialPorts { get; private set; }
-        public DeviceInformationCollection BtSmartDevices { get; private set; }
         public List<HeartRateMonitor> Devices { get; private set; }
         public HeartRateMonitor HRM
         {
@@ -126,36 +119,6 @@ namespace MGT.Cardia
                 SerialPorts.Add(serialPort);
         }
 
-        private void InitializeBtDevices()
-        {
-            var task = DeviceInformation.FindAllAsync(
-                GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.HeartRate),
-                new string[] { "System.Devices.ContainerId" });
-
-            try
-            {
-                while(true) 
-                {
-                    Thread.Sleep(100);
-
-                    var status = task.Status;
-
-                    if (status == Windows.Foundation.AsyncStatus.Canceled || task.Status == Windows.Foundation.AsyncStatus.Error)
-                        return;
-
-                    if (status == Windows.Foundation.AsyncStatus.Completed)
-                    {
-                        BtSmartDevices = task.GetResults();
-                        return;
-                    }
-                }
-            }
-            finally
-            {
-                task.Close();
-            }
-        }
-
         private void InitializeDevices()
         {
             Devices = new List<HeartRateMonitor>();
@@ -201,13 +164,6 @@ namespace MGT.Cardia
                 }
             }
             Devices.Add(cms50);
-
-            BtHrp btHrp = new BtHrp();
-            if (BtSmartDevices.Count > 0)
-            {
-                btHrp.Device = BtSmartDevices[0];
-            }
-            Devices.Add(btHrp);
 
             HRMEmulator emulator = new HRMEmulator();
             emulator.EmulatorMinBPM = configuration.Device.HRMEmulator.Min;
@@ -489,22 +445,6 @@ namespace MGT.Cardia
                     if (configuration.Device.CMS50.ComPort != null)
                         ((CMS50)hrm).SerialPort = configuration.Device.CMS50.ComPort;
                     break;
-                case Configuration.DeviceConfiguration.DeviceType.BtHrp:
-                    hrm = Devices[2];
-                    if (configuration.Device.BtHrp.DeviceId != null)
-                    {
-                        foreach (DeviceInformation deviceInformation in BtSmartDevices)
-                        {
-                            if (deviceInformation.Id == configuration.Device.BtHrp.DeviceId)
-                            {
-                                ((BtHrp)hrm).Device = deviceInformation;
-                                break;
-                            }
-                        }
-                    }
-                    ((BtHrp)hrm).CharacteristicIndex = configuration.Device.BtHrp.CharacteristicIndex;
-                    ((BtHrp)hrm).InitDelay = configuration.Device.BtHrp.InitDelay;
-                    break;
                 case Configuration.DeviceConfiguration.DeviceType.HRMEmulator:
                     hrm = Devices[3];
                     break;
@@ -673,14 +613,6 @@ namespace MGT.Cardia
             {
                 configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.CMS50;
                 configuration.Device.CMS50.ComPort = ((CMS50)hrm).SerialPort;
-            }
-            else if (hrm is BtHrp)
-            {
-                configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.BtHrp;
-                if (((BtHrp)hrm).Device != null)
-                    configuration.Device.BtHrp.DeviceId = ((BtHrp)hrm).Device.Id;
-                configuration.Device.BtHrp.CharacteristicIndex = ((BtHrp)hrm).CharacteristicIndex;
-                configuration.Device.BtHrp.InitDelay = ((BtHrp)hrm).InitDelay;
             }
             else if (hrm is HRMEmulator)
             {

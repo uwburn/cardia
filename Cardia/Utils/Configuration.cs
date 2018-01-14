@@ -36,13 +36,6 @@ namespace MGT.Cardia
             public string ComPort = null;
         }
 
-        public class BtHrpConfiguration
-        {
-            public string DeviceId = null;
-            public int CharacteristicIndex = 0;
-            public int InitDelay = 500;
-        }
-
         public class HRMEmulatorConfiguration
         {
             public int Min = 30;
@@ -51,12 +44,11 @@ namespace MGT.Cardia
 
         public class DeviceConfiguration 
         {
-            public enum DeviceType { HRMEmulator, ZephyrHxM, CMS50, BtHrp }
+            public enum DeviceType { HRMEmulator, ZephyrHxM, CMS50 }
 
             public DeviceType Type = DeviceType.ZephyrHxM;
             public ZephyrHxMConfiguration ZephyrHxM = new ZephyrHxMConfiguration();
             public CMS50Configuration CMS50 = new CMS50Configuration();
-            public BtHrpConfiguration BtHrp = new BtHrpConfiguration();
             public HRMEmulatorConfiguration HRMEmulator = new HRMEmulatorConfiguration();
         }
 
