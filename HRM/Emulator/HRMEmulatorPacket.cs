@@ -18,5 +18,11 @@ namespace MGT.HRM.Emulator
         {
             get { return heartRate; }
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + "[ HeartRate = " + HeartRate + " ]";
+        }
+
     }
 }

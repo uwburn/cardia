@@ -78,5 +78,11 @@ namespace MGT.HRM.Zephyr_HxM
         {
             get { return heartRate; }
         }
+
+        public override string ToString()
+        {
+            return base.ToString() + "[ HeartRate = " + HeartRate + " ]";
+        }
+
     }
 }

@@ -5,11 +5,14 @@ using System.Text;
 using System.IO.Ports;
 using System.Timers;
 using MGT.Utilities.EventHandlers;
+using log4net;
 
 namespace MGT.HRM.Zephyr_HxM
 {
     public sealed class ZephyrHxM : HeartRateMonitor
     {
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public override string Name { get { return "Zephyr HxM"; } }
 
         private static TimeSpan START_TIMEOUT = new TimeSpan(0, 0, 10);
@@ -127,6 +130,9 @@ namespace MGT.HRM.Zephyr_HxM
             }
             set
             {
+                if (Running)
+                    throw new Exception();
+
                 string backup = SerialPort;
 
                 serialPort = new SerialPort(value);
@@ -149,15 +155,23 @@ namespace MGT.HRM.Zephyr_HxM
         {
             if (!Running)
             {
+#if DEBUG
+                logger.Debug("Starting Zephyr HxM");
+#endif
+
                 try
                 {
                     lastReceivedDate = DateTime.Now;
                     serialPort.Open();
                 }
-                catch
+                catch(Exception e)
                 {
+#if DEBUG
+                    logger.Warn("Error opening serial port", e);
+#endif
+
                     FireTimeout("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
-                    throw new Exception("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
+                    //throw new Exception("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
                 }
                 timeoutTimer.Start();
                 Running = true;
@@ -175,6 +189,13 @@ namespace MGT.HRM.Zephyr_HxM
             TimeSpan diff = DateTime.Now - lastReceivedDate;
             if (diff > timeout)
             {
+#if DEBUG
+                if (Running)
+                    logger.Debug("Communication timeout elapsed");
+                else
+                    logger.Debug("Start timeout elapsed");
+#endif
+
                 Stop();
                 FireTimeout("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
             }
@@ -184,6 +205,10 @@ namespace MGT.HRM.Zephyr_HxM
         {
             if (Running)
             {
+#if DEBUG
+                logger.Debug("Stopping Zephyr HxM");
+#endif
+
                 Running = false;
                 serialPort.Close();
                 timeoutTimer.Stop();
@@ -193,11 +218,19 @@ namespace MGT.HRM.Zephyr_HxM
 
         public override void Reset()
         {
+#if DEBUG
+            logger.Debug("Resetting Zephyr HxM");
+#endif
+
             reset = true;
         }
 
         private void DoReset()
         {
+#if DEBUG
+            logger.Debug("Resetting counters");
+#endif
+
             TotalPackets = 0;
             CorruptedPackets = 0;
             HeartBeats = 0;
@@ -222,9 +255,17 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
+#if DEBUG
+            logger.Debug("Serial port data received");
+#endif
+
             byte[] bytes = new byte[serialPort.BytesToRead];
 
             serialPort.Read(bytes, 0, bytes.Length);
+
+#if DEBUG
+            logger.Debug("Equeuing data = " + bytes);
+#endif
 
             foreach (byte b in bytes)
             {
@@ -236,6 +277,10 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void ResetPacketQueue()
         {
+#if DEBUG
+            logger.Debug("Resetting packet queue");
+#endif
+
             packetQueue.Clear();
             packetStarted = false;
             msgIdRecognized = false;
@@ -244,6 +289,10 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void StartPacketQueue()
         {
+#if DEBUG
+            logger.Debug("Starting packet queue");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
             packetStarted = true;
             TotalPackets++;
@@ -251,12 +300,20 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void RecognizeMessageId()
         {
+#if DEBUG
+            logger.Debug("Recognizing message id");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
             msgIdRecognized = true;
         }
 
         private void BuildPacket()
         {
+#if DEBUG
+            logger.Debug("Building packet");
+#endif
+
             byte b = receivedData.Dequeue();
             packetQueue.Enqueue(b);
 
@@ -266,6 +323,10 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void ClosePacketQueue()
         {
+#if DEBUG
+            logger.Debug("Closing packet queue");
+#endif
+
             packetQueue.Enqueue(receivedData.Dequeue());
 
             try
@@ -273,9 +334,17 @@ namespace MGT.HRM.Zephyr_HxM
                 ZephyrPacket zephyrPacket = new ZephyrPacket(packetQueue.ToArray());
                 secondLastPacket = lastPacket;
                 lastPacket = zephyrPacket;
+
+#if DEBUG
+                logger.Debug("Constructed Zephyr HxM packet = " + zephyrPacket);
+#endif
             }
-            catch (CorruptedPacketExcpetion)
+            catch (CorruptedPacketExcpetion e)
             {
+#if DEBUG
+                logger.Debug("Packet construction failed, corrupted packet", e);
+#endif
+
                 CorruptedPackets++;
             }
 
@@ -286,6 +355,10 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void ProcessData()
         {
+#if DEBUG
+            logger.Debug("Processing data");
+#endif
+
             if (reset)
                 DoReset();
 
@@ -313,6 +386,10 @@ namespace MGT.HRM.Zephyr_HxM
 
         private void ProcessPackets()
         {
+#if DEBUG
+            logger.Debug("Processing packets");
+#endif
+
             // Smoothed values computation
             if (heartRateSmoothing[0] == null)
             {
@@ -415,6 +492,9 @@ namespace MGT.HRM.Zephyr_HxM
 
             lastReceivedDate = DateTime.Now;
 
+#if DEBUG
+            logger.Debug("Firing PacketProcessed event, packet = " + LastPacket);
+#endif
             PacketProcessedEventArgs args = new PacketProcessedEventArgs(LastPacket);
             base.FirePacketProcessed(args);
         }

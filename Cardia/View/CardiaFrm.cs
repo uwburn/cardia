@@ -1,22 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.IO.Ports;
 using MGT.ECG_Signal_Generator;
-using System.Drawing.Drawing2D;
 using MGT.HRM.Emulator;
 using MGT.HRM;
 using MGT.HRM.Zephyr_HxM;
-using MGT.Utilities.Network;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using MGT.Utilities.EventHandlers;
 using MGT.HRM.CMS50;
+using MGT.HRM.HRP;
 
 namespace MGT.Cardia
 {
@@ -141,6 +133,11 @@ namespace MGT.Cardia
             else if (device is CMS50)
             {
                 if (!InitializeCMS50Panel())
+                    return;
+            }
+            else if (device is BtHrp)
+            {
+                if (!InitializeBtHrpPanel())
                     return;
             }
             else if (device is HRMEmulator)
@@ -551,6 +548,15 @@ namespace MGT.Cardia
             CMS50 cms50 = (CMS50)cardia.HRM;
 
             devicePanel = new CMS50Frm(cardia);
+
+            return true;
+        }
+
+        private bool InitializeBtHrpPanel()
+        {
+            BtHrp btHrp = (BtHrp)cardia.HRM;
+
+            devicePanel = new BtHrpFrm(cardia);
 
             return true;
         }

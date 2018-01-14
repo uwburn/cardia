@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,8 @@ namespace MGT.HRM.Emulator
 {
     public sealed class HRMEmulator : HeartRateMonitor
     {
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public override string Name { get { return "Emulator"; } }
 
         Timer timer;
@@ -84,6 +87,10 @@ namespace MGT.HRM.Emulator
         {
             lastPacket = new HRMEmulatorPacket(bpm);
 
+#if DEBUG
+            logger.Debug("Generated emulated packet = " + lastPacket.ToString());
+#endif
+
             if (MinHeartRate == null)
             {
                 MinHeartRate = (byte)bpm;
@@ -134,6 +141,9 @@ namespace MGT.HRM.Emulator
             heartBeats += bpm / 60D;
             HeartBeats = (int)heartBeats;
 
+#if DEBUG
+            logger.Debug("Firing PacketProcessed event, packet = " + lastPacket);
+#endif
             PacketProcessedEventArgs args2 = new PacketProcessedEventArgs(lastPacket);
             base.FirePacketProcessed(args2);
         }
@@ -175,18 +185,30 @@ namespace MGT.HRM.Emulator
 
         public override void Start()
         {
+#if DEBUG
+            logger.Debug("Starting HRM Emulator");
+#endif
+
             timer.Start();
             Running = true;
         }
 
         public override void Stop()
         {
+#if DEBUG
+            logger.Debug("Stopping HRM Emulator");
+#endif
+
             timer.Stop();
             Running = false;
         }
 
         public override void Reset()
         {
+#if DEBUG
+            logger.Debug("Resetting HRM Emulator");
+#endif
+
             MinHeartRate = null;
             MaxHeartRate = null;
         }
