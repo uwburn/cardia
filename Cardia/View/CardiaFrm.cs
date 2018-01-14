@@ -67,6 +67,9 @@ namespace MGT.Cardia
         {
             foreach (HeartRateMonitor hrm in cardia.Devices)
             {
+                if (hrm == null)
+                    continue;
+
                 ToolStripMenuItem item = new ToolStripMenuItem();
                 item.Text = hrm.Name;
                 item.Click += new EventHandler(miDevicesItem_Clicked);

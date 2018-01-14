@@ -164,6 +164,7 @@ namespace MGT.Cardia
                 }
             }
             Devices.Add(cms50);
+            Devices.Add(null);
 
             HRMEmulator emulator = new HRMEmulator();
             emulator.EmulatorMinBPM = configuration.Device.HRMEmulator.Min;
