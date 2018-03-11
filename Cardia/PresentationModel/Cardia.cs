@@ -815,6 +815,8 @@ namespace MGT.Cardia
                 Logger = new CMS50LoggerCSV();
             else if (hrm is HRMEmulator)
                 Logger = new HRMEmulatorLoggerCSV();
+            else if (hrm is BtHrp)
+                logger = new BtHrpLoggerCSV();
         }
 
         private void SetXLSXLogger()
@@ -825,6 +827,8 @@ namespace MGT.Cardia
                 Logger = new CMS50LoggerXLSX();
             else if (hrm is HRMEmulator)
                 Logger = new HRMEmulatorLoggerXLSX();
+            else if (hrm is BtHrp)
+                logger = new BtHrpLoggerXLSX();
         }
 
         private void SetXMLLogger()
@@ -835,6 +839,8 @@ namespace MGT.Cardia
                 Logger = new CMS50LoggerXML();
             else if (hrm is HRMEmulator)
                 Logger = new HRMEmulatorLoggerXML();
+            else if (hrm is BtHrp)
+                logger = new BtHrpLoggerXML();
         }
 
         private void InitializeLoggers()
