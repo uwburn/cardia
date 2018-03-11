@@ -81,6 +81,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bundle\BtHrpBundle.cs" />
+    <Compile Include="Bundle\HRMEmulatorBundle.cs" />
+    <Compile Include="Bundle\Bundle.cs" />
+    <Compile Include="Bundle\CMS50Bundle.cs" />
+    <Compile Include="Bundle\ZephyrHxMBundle.cs" />
     <Compile Include="Model\HRMAlarm.cs" />
     <Compile Include="View\AboutFrm.cs">
       <SubType>Form</SubType>

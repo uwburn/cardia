@@ -1,35 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using MGT.HRM;
 using MGT.HRM.CMS50;
-using System.IO.Ports;
-using MGT.Utilities.EventHandlers;
+using MGT.HRM;
 
 namespace MGT.Cardia
 {
     public partial class CMS50Frm : HRMDeviceFrm
     {
-        private Cardia cardia;
         private CMS50 cms50;
         List<string> serialPortNames;
 
-        public CMS50Frm(Cardia cardia)
+        public CMS50Frm(CMS50Bundle bundle)
         {
             InitializeComponent();
 
-            this.cardia = cardia;
-            this.cms50 = (CMS50)cardia.HRM;
-            serialPortNames = cardia.SerialPorts;
+            this.cms50 = bundle.CMS50;
+            serialPortNames = bundle.SerialPorts;
 
-            cardia.Started += cardia_Started;
-            cardia.Stopped += cardia_Stopped;
-            cardia.PacketProcessed += cardia_OnPacketProcessed;
+            bundle.Started += bundle_Started;
+            bundle.Stopped += bundle_Stopped;
+            cms50.PacketProcessed += cms50_OnPacketProcessed;
             cms50.SerialPortChanged += cms50_SerialPortChanged;
 
             foreach (string serialPortName in serialPortNames)
@@ -57,12 +48,12 @@ namespace MGT.Cardia
             }
         }
 
-        void cardia_Started(object sender)
+        void bundle_Started(object sender)
         {
             LockConfigurationUI();
         }
 
-        void cardia_Stopped(object sender)
+        void bundle_Stopped(object sender)
         {
             UnlockConfigurationUI();
         }
@@ -82,7 +73,7 @@ namespace MGT.Cardia
             cbSerialPorts.Enabled = true;
         }
 
-        public void cardia_OnPacketProcessed(object sender, HRMStatus status)
+        public void cms50_OnPacketProcessed(object sender, PacketProcessedEventArgs status)
         {
             if (this.IsHandleCreated)
             {

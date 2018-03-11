@@ -1,23 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using MGT.HRM.Emulator;
 using MGT.ECG_Signal_Generator;
-using MGT.HRM.Zephyr_HxM;
-using MGT.HRM.HRP;
 using MGT.HRM;
 using MGT.Utilities.Network;
 using System.Collections.Concurrent;
 using System.Drawing;
-using System.IO.Ports;
 using MGT.Utilities.EventHandlers;
-using MGT.HRM.CMS50;
-using System.Timers;
-using Windows.Devices.Bluetooth.GenericAttributeProfile;
-using Windows.Devices.Enumeration;
-using Windows.Devices.Enumeration.Pnp;
-using System.Threading;
 
 namespace MGT.Cardia
 {
@@ -31,18 +19,16 @@ namespace MGT.Cardia
 
         #endregion
 
-        #region Constructors
+        #region Constructors & initialization
 
-        public Cardia(Configuration configuration)
+        public Cardia(Configuration configuration, List<Bundle> bundles)
         {
             this.configuration = configuration;
+            this.Bundles = bundles;
 
             signalGenerator.OnSignalGenerated += signalGenerator_SignalGenerated;
             alarm.AlarmChanged += alarm_AlarmChanged;
 
-            InitializeSerialPorts();
-            InitializeBtDevices();
-            InitializeDevices();
             InitializeLoggers();
             InitializeNetworkProvider();
             InitializeColors();
@@ -53,35 +39,33 @@ namespace MGT.Cardia
         #region HRM
 
         // Fields
-        private HeartRateMonitor hrm;
+        private Bundle bundle;
         private const int BUFFER_TIME = 10000;
         private SignalGenerator signalGenerator = new SignalGenerator(BUFFER_TIME);
         private HRMAlarm alarm = new HRMAlarm();
 
         // Events
-        public event GenericEventHandler<HeartRateMonitor> DeviceChanged;
+        public event GenericEventHandler<Bundle> BundleChanged;
         public event GenericEventHandler<HRMStatus> PacketProcessed;
         public event GenericEventHandler<SignalGeneratedEventArgs> SignalGenerated;
         public event GenericEventHandler<bool> AlarmTripped;
 
         // Properties
-        public List<string> SerialPorts { get; private set; }
-        public DeviceInformationCollection BtSmartDevices { get; private set; }
-        public List<HeartRateMonitor> Devices { get; private set; }
-        public HeartRateMonitor HRM
+        public List<Bundle> Bundles { get; private set; }
+        public Bundle Bundle
         {
-            get { return hrm; }
+            get { return bundle; }
             set
             {
-                if (hrm != null)
-                    if (hrm.Running)
+                if (bundle != null)
+                    if (bundle.Device.Running)
                         throw new Exception("Cannot change device while current device is running");
 
-                if (hrm != null)
-                    hrm.ResetSubscriptions();
+                if (bundle != null)
+                    bundle.Device.ResetSubscriptions();
 
-                HeartRateMonitor bck = hrm;
-                hrm = value;
+                Bundle bck = bundle;
+                bundle = value;
 
                 SetLogger();
 
@@ -91,12 +75,12 @@ namespace MGT.Cardia
                 if (value != bck)
                 {
                     if (bck != null)
-                        bck.ResetSubscriptions();
+                        bck.Device.ResetSubscriptions();
 
                     RegisterHrmEventHandlers();
 
-                    if (DeviceChanged != null)
-                        DeviceChanged(this, hrm);
+                    if (BundleChanged != null)
+                        BundleChanged(this, bundle);
                 }
             }
         }
@@ -104,8 +88,8 @@ namespace MGT.Cardia
         // Methods
         private void RegisterHrmEventHandlers()
         {
-            hrm.PacketProcessed += hrm_PacketProcessed;
-            hrm.Timeout += Cardia_Timeout;
+            bundle.Device.PacketProcessed += hrm_PacketProcessed;
+            bundle.Device.Timeout += Cardia_Timeout;
         }
 
         void Cardia_Timeout(object sender, string arg)
@@ -114,105 +98,6 @@ namespace MGT.Cardia
 
             if (StatusChanged != null)
                 StatusChanged(this, arg, true);
-        }
-
-        private void InitializeSerialPorts()
-        {
-            string[] serialPortNames = SerialPort.GetPortNames();
-            Array.Sort(serialPortNames, StringComparer.InvariantCulture);
-
-            SerialPorts = new List<string>();
-            foreach (string serialPort in serialPortNames)
-                SerialPorts.Add(serialPort);
-        }
-
-        private void InitializeBtDevices()
-        {
-            var task = DeviceInformation.FindAllAsync(
-                GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.HeartRate),
-                new string[] { "System.Devices.ContainerId" });
-
-            try
-            {
-                while(true) 
-                {
-                    Thread.Sleep(100);
-
-                    var status = task.Status;
-
-                    if (status == Windows.Foundation.AsyncStatus.Canceled || task.Status == Windows.Foundation.AsyncStatus.Error)
-                        return;
-
-                    if (status == Windows.Foundation.AsyncStatus.Completed)
-                    {
-                        BtSmartDevices = task.GetResults();
-                        return;
-                    }
-                }
-            }
-            finally
-            {
-                task.Close();
-            }
-        }
-
-        private void InitializeDevices()
-        {
-            Devices = new List<HeartRateMonitor>();
-
-            ZephyrHxM zephyr = new ZephyrHxM();
-            if (SerialPorts.Count > 0)
-            {
-                if (configuration.Device.ZephyrHxM.ComPort != null)
-                {
-                    foreach (string serialPort in SerialPorts)
-                    {
-                        if (serialPort == configuration.Device.ZephyrHxM.ComPort)
-                        {
-                            zephyr.SerialPort = serialPort;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    zephyr.SerialPort = SerialPorts[0];
-                }
-            }
-            Devices.Add(zephyr);
-
-            CMS50 cms50 = new CMS50();
-            if (SerialPorts.Count > 0)
-            {
-                if (configuration.Device.CMS50.ComPort != null)
-                {
-                    foreach (string serialPort in SerialPorts)
-                    {
-                        if (serialPort == configuration.Device.CMS50.ComPort)
-                        {
-                            cms50.SerialPort = serialPort;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    cms50.SerialPort = SerialPorts[0];
-                }
-            }
-            Devices.Add(cms50);
-
-            BtHrp btHrp = new BtHrp();
-            if (BtSmartDevices.Count > 0)
-            {
-                btHrp.Device = BtSmartDevices[0];
-            }
-            Devices.Add(btHrp);
-
-            HRMEmulator emulator = new HRMEmulator();
-            emulator.EmulatorMinBPM = configuration.Device.HRMEmulator.Min;
-            emulator.EmulatorMaxBPM = configuration.Device.HRMEmulator.Max;
-            Devices.Add(emulator);
         }
 
         // HRM event handler
@@ -227,7 +112,7 @@ namespace MGT.Cardia
             }
 
             if (PacketProcessed != null)
-                PacketProcessed(this, new HRMStatus(hrm, e.HRMPacket));
+                PacketProcessed(this, new HRMStatus(bundle.Device, e.HRMPacket));
         }
 
         // Signal generator event handler
@@ -471,44 +356,31 @@ namespace MGT.Cardia
         public void Init()
         {
             LoadConfiguration();
+            if (bundle == null)
+                bundle = Bundles[0];
 
             FireEventChain();
         }
 
+        private void RegisterBundlesEventHandlers()
+        {
+            foreach (Bundle b in Bundles)
+            {
+                b.RegisterCardiaEventHandlers(this);
+            }
+        }
+
         private void LoadConfiguration()
         {
-            switch (configuration.Device.Type)
+            foreach (Bundle b in Bundles)
             {
-                case Configuration.DeviceConfiguration.DeviceType.ZephyrHxM:
-                    hrm = Devices[0];
-                    if (configuration.Device.ZephyrHxM.ComPort != null)
-                        ((ZephyrHxM)hrm).SerialPort = configuration.Device.ZephyrHxM.ComPort;
-                    break;
-                case Configuration.DeviceConfiguration.DeviceType.CMS50:
-                    hrm = Devices[1];
-                    if (configuration.Device.CMS50.ComPort != null)
-                        ((CMS50)hrm).SerialPort = configuration.Device.CMS50.ComPort;
-                    break;
-                case Configuration.DeviceConfiguration.DeviceType.BtHrp:
-                    hrm = Devices[2];
-                    if (configuration.Device.BtHrp.DeviceId != null)
-                    {
-                        foreach (DeviceInformation deviceInformation in BtSmartDevices)
-                        {
-                            if (deviceInformation.Id == configuration.Device.BtHrp.DeviceId)
-                            {
-                                ((BtHrp)hrm).Device = deviceInformation;
-                                break;
-                            }
-                        }
-                    }
-                    ((BtHrp)hrm).CharacteristicIndex = configuration.Device.BtHrp.CharacteristicIndex;
-                    ((BtHrp)hrm).InitDelay = configuration.Device.BtHrp.InitDelay;
-                    break;
-                case Configuration.DeviceConfiguration.DeviceType.HRMEmulator:
-                    hrm = Devices[3];
-                    break;
+                b.Configure(configuration.Device);
+                if (b.ConfigEnumerator == configuration.Device.Type)
+                {
+                    bundle = b;
+                }
             }
+
             RegisterHrmEventHandlers();
 
             color = Colors[configuration.Color];
@@ -540,8 +412,8 @@ namespace MGT.Cardia
 
         private void FireEventChain()
         {
-            if (DeviceChanged != null)
-                DeviceChanged(this, hrm);
+            if (BundleChanged != null)
+                BundleChanged(this, bundle);
 
             if (ColorChanged != null)
                 ColorChanged(this, color);
@@ -594,12 +466,12 @@ namespace MGT.Cardia
             if (StatusChanged != null)
                 StatusChanged(this, "Starting...", false);
 
-            hrm.HeartRateSmoothingFactor = 1;
+            bundle.Device.HeartRateSmoothingFactor = 1;
 
             try
             {
                 if (logEnabled)
-                    logger.Start(hrm);
+                    logger.Start(bundle.Device);
             }
             catch (Exception)
             {
@@ -612,7 +484,7 @@ namespace MGT.Cardia
 
             try
             {
-                hrm.Start();
+                bundle.Device.Start();
             }
             catch (Exception)
             {
@@ -623,7 +495,7 @@ namespace MGT.Cardia
                 return;
             }
 
-            if (hrm.Running)
+            if (bundle.Device.Running)
             {
                 signalGenerator.Start();
 
@@ -640,7 +512,7 @@ namespace MGT.Cardia
         private void DoStop(bool stopHrm, bool notifyError)
         {
             if (stopHrm)
-                hrm.Stop();
+                bundle.Device.Stop();
 
             signalGenerator.Stop();
 
@@ -664,28 +536,7 @@ namespace MGT.Cardia
         {
             configuration.Color = Colors.IndexOf(color);
 
-            if (hrm is ZephyrHxM)
-            {
-                configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.ZephyrHxM;
-                configuration.Device.ZephyrHxM.ComPort = ((ZephyrHxM)hrm).SerialPort;
-            }
-            else if (hrm is CMS50)
-            {
-                configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.CMS50;
-                configuration.Device.CMS50.ComPort = ((CMS50)hrm).SerialPort;
-            }
-            else if (hrm is BtHrp)
-            {
-                configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.BtHrp;
-                if (((BtHrp)hrm).Device != null)
-                    configuration.Device.BtHrp.DeviceId = ((BtHrp)hrm).Device.Id;
-                configuration.Device.BtHrp.CharacteristicIndex = ((BtHrp)hrm).CharacteristicIndex;
-                configuration.Device.BtHrp.InitDelay = ((BtHrp)hrm).InitDelay;
-            }
-            else if (hrm is HRMEmulator)
-            {
-                configuration.Device.Type = Configuration.DeviceConfiguration.DeviceType.HRMEmulator;
-            }
+            bundle.SaveConfig(configuration.Device);
 
             configuration.ChartTime = chartTime;
 
@@ -773,8 +624,8 @@ namespace MGT.Cardia
             get { return logger; }
             private set
             {
-                if (hrm != null)
-                    if (hrm.Running)
+                if (bundle != null)
+                    if (bundle.Device.Running)
                         throw new Exception("Cannot change logger while device is running");
 
                 IHRMLogger bck = logger;
@@ -793,54 +644,21 @@ namespace MGT.Cardia
         // Methods
         private void SetLogger()
         {
+            if (bundle == null)
+                return;
+
             switch (logFormat)
             {
                 case LogFormat.CSV:
-                    SetCSVLogger();
+                    Logger = bundle.CSVLogger;
                     break;
                 case LogFormat.XLSX:
-                    SetXLSXLogger();
+                    Logger = bundle.XLSXLogger;
                     break;
                 case LogFormat.XML:
-                    SetXMLLogger();
+                    Logger = bundle.XMLLogger;
                     break;
             }
-        }
-
-        private void SetCSVLogger()
-        {
-            if (hrm is ZephyrHxM)
-                Logger = new ZephyrHxMLoggerCSV();
-            else if (hrm is CMS50)
-                Logger = new CMS50LoggerCSV();
-            else if (hrm is HRMEmulator)
-                Logger = new HRMEmulatorLoggerCSV();
-            else if (hrm is BtHrp)
-                logger = new BtHrpLoggerCSV();
-        }
-
-        private void SetXLSXLogger()
-        {
-            if (hrm is ZephyrHxM)
-                Logger = new ZephyrHxMLoggerXLSX();
-            else if (hrm is CMS50)
-                Logger = new CMS50LoggerXLSX();
-            else if (hrm is HRMEmulator)
-                Logger = new HRMEmulatorLoggerXLSX();
-            else if (hrm is BtHrp)
-                logger = new BtHrpLoggerXLSX();
-        }
-
-        private void SetXMLLogger()
-        {
-            if (hrm is ZephyrHxM)
-                Logger = new ZephyrHxMLoggerXML();
-            else if (hrm is CMS50)
-                Logger = new CMS50LoggerXML();
-            else if (hrm is HRMEmulator)
-                Logger = new HRMEmulatorLoggerXML();
-            else if (hrm is BtHrp)
-                logger = new BtHrpLoggerXML();
         }
 
         private void InitializeLoggers()
@@ -1144,8 +962,8 @@ namespace MGT.Cardia
 
             StopNetwork();
 
-            foreach (HeartRateMonitor hrm in Devices)
-                hrm.Dispose();
+            foreach (Bundle bundle in Bundles)
+                bundle.Dispose();
 
             alarm.Dispose();
 

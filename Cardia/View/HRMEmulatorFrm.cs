@@ -14,30 +14,28 @@ namespace MGT.Cardia
 {
     public partial class HRMEmulatorFrm : HRMDeviceFrm
     {
-        private Cardia cardia;
         private HRMEmulator hrmEmulator;
 
-        public HRMEmulatorFrm(Cardia cardia)
+        public HRMEmulatorFrm(HRMEmulatorBundle bundle)
         {
             InitializeComponent();
 
-            this.cardia = cardia;
-            this.hrmEmulator = (HRMEmulator)cardia.HRM;
+            this.hrmEmulator = bundle.HRMEmulator;
             nudMinBPM.Value = hrmEmulator.EmulatorMinBPM;
             nudMaxBPM.Value = hrmEmulator.EmulatorMaxBPM;
 
-            cardia.Started += cardia_Started;
-            cardia.Stopped += cardia_Stopped;
+            bundle.Started += bundle_Started;
+            bundle.Stopped += bundle_Stopped;
             hrmEmulator.EmulatorMinBPMChanged += hrmEmulator_EmulatorMinBPMChanged;
             hrmEmulator.EmulatorMaxBPMChanged += hrmEmulator_EmulatorMaxBPMChanged;
         }
 
-        void cardia_Started(object sender)
+        void bundle_Started(object sender)
         {
             LockConfigurationUI();
         }
 
-        void cardia_Stopped(object sender)
+        void bundle_Stopped(object sender)
         {
             UnlockConfigurationUI();
         }

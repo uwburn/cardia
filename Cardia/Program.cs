@@ -1,5 +1,6 @@
 ﻿using log4net;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 [assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "log4net.config"),]
@@ -55,6 +56,18 @@ namespace MGT.Cardia
 
         private static string configurationFileName = "Cardia.xml";
 
+        private static List<Bundle> buildBundles()
+        {
+            List<Bundle> bundles = new List<Bundle>();
+
+            bundles.Add(new ZephyrHxMBundle());
+            bundles.Add(new CMS50Bundle());
+            bundles.Add(new BtHrpBundle());
+            bundles.Add(new HRMEmulatorBundle());
+
+            return bundles;
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -90,7 +103,8 @@ namespace MGT.Cardia
                 configuration = new Configuration();
             }
 
-            Cardia cardia = new Cardia(configuration);
+            List<Bundle> bundles = buildBundles();
+            Cardia cardia = new Cardia(configuration, bundles);
 
             /*if (DateTime.Today > cardia.ExpiryDate)
             {

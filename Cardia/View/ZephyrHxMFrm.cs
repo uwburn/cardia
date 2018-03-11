@@ -15,21 +15,19 @@ namespace MGT.Cardia
 {
     public partial class ZephyrHxMFrm : HRMDeviceFrm
     {
-        private Cardia cardia;
         private ZephyrHxM zephyrHxM;
         List<string> serialPortNames;
 
-        public ZephyrHxMFrm(Cardia cardia)
+        public ZephyrHxMFrm(ZephyrHxMBundle bundle)
         {
             InitializeComponent();
 
-            this.cardia = cardia;
-            this.zephyrHxM = (ZephyrHxM)cardia.HRM;
-            serialPortNames = cardia.SerialPorts;
+            this.zephyrHxM = bundle.ZephyrHxM;
+            serialPortNames = bundle.SerialPorts;
 
-            cardia.Started += cardia_Started;
-            cardia.Stopped += cardia_Stopped;
-            cardia.PacketProcessed += cardia_OnPacketProcessed;
+            bundle.Started += bundle_Started;
+            bundle.Stopped += bundle_Stopped;
+            zephyrHxM.PacketProcessed += bundle_OnPacketProcessed;
             zephyrHxM.SerialPortChanged += zephyrHxM_SerialPortChanged;
 
             foreach (string serialPortName in serialPortNames)
@@ -57,12 +55,12 @@ namespace MGT.Cardia
             }
         }
 
-        void cardia_Started(object sender)
+        void bundle_Started(object sender)
         {
             LockConfigurationUI();
         }
 
-        void cardia_Stopped(object sender)
+        void bundle_Stopped(object sender)
         {
             UnlockConfigurationUI();
         }
@@ -82,7 +80,7 @@ namespace MGT.Cardia
             cbSerialPorts.Enabled = true;
         }
 
-        public void cardia_OnPacketProcessed(object sender, HRMStatus status)
+        public void bundle_OnPacketProcessed(object sender, PacketProcessedEventArgs status)
         {
             if (this.IsHandleCreated)
             {
