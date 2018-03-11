@@ -23,7 +23,7 @@ namespace MGT.Cardia
 
         public abstract void InitDevice();
         public abstract void InitControlForm();
-        public abstract void Configure(Configuration.DeviceConfiguration deviceConfiguration);
+        public abstract void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration);
         public abstract void SaveConfig(Configuration.DeviceConfiguration deviceConfiguration);
 
         public void RegisterCardiaEventHandlers(Cardia cardia)

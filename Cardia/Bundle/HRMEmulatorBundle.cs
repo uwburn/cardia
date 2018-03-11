@@ -42,7 +42,7 @@ namespace MGT.Cardia
 
         }
 
-        public override void Configure(Configuration.DeviceConfiguration deviceConfiguration)
+        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration)
         {
             hrmEmulator.EmulatorMinBPM = deviceConfiguration.HRMEmulator.Min;
             hrmEmulator.EmulatorMaxBPM = deviceConfiguration.HRMEmulator.Max;

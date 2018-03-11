@@ -78,7 +78,7 @@ namespace MGT.Cardia
 
         }
 
-        public override void Configure(Configuration.DeviceConfiguration deviceConfiguration)
+        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration)
         {
             if (deviceConfiguration.BtHrp.DeviceId != null)
             {

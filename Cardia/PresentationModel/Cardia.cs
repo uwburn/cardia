@@ -355,7 +355,8 @@ namespace MGT.Cardia
         // Methods
         public void Init()
         {
-            LoadConfiguration();
+            RegisterBundlesEventHandlers();
+            LoadConfig();
             if (bundle == null)
                 bundle = Bundles[0];
 
@@ -370,11 +371,11 @@ namespace MGT.Cardia
             }
         }
 
-        private void LoadConfiguration()
+        private void LoadConfig()
         {
             foreach (Bundle b in Bundles)
             {
-                b.Configure(configuration.Device);
+                b.LoadConfig(configuration.Device);
                 if (b.ConfigEnumerator == configuration.Device.Type)
                 {
                     bundle = b;
