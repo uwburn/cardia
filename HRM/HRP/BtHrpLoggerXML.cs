@@ -47,14 +47,14 @@ namespace MGT.HRM.HRP
             xmlWriter.WriteStartAttribute("time");
             xmlWriter.WriteValue(minTime);
             xmlWriter.WriteEndAttribute();
-            xmlWriter.WriteValue(min);
+            xmlWriter.WriteValue(min ?? 0);
             xmlWriter.WriteEndElement();
 
             xmlWriter.WriteStartElement("Max");
             xmlWriter.WriteStartAttribute("time");
             xmlWriter.WriteValue(maxTime);
             xmlWriter.WriteEndAttribute();
-            xmlWriter.WriteValue(max);
+            xmlWriter.WriteValue(max ?? 0);
             xmlWriter.WriteEndElement();
 
             xmlWriter.WriteStartElement("EndTime");
@@ -99,7 +99,6 @@ namespace MGT.HRM.HRP
             xmlWriter.WriteEndAttribute();
             xmlWriter.WriteStartElement("BPM");
             xmlWriter.WriteValue(btHrpPacketPacket.HeartRate);
-            xmlWriter.WriteEndElement();
             xmlWriter.WriteEndElement();
             xmlWriter.WriteEndElement();
         }
