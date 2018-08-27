@@ -19,6 +19,7 @@ namespace MGT.Cardia
         private readonly BtHrpLoggerCSV csvLogger = new BtHrpLoggerCSV();
         private readonly BtHrpLoggerXLSX xlsxLogger = new BtHrpLoggerXLSX();
         private readonly BtHrpLoggerXML xmlLogger = new BtHrpLoggerXML();
+        private readonly BtHrpLoggerUDP udpLogger = new BtHrpLoggerUDP();
 
         public DeviceInformationCollection BtSmartDevices { get; private set; }
 
@@ -61,9 +62,10 @@ namespace MGT.Cardia
 
         public override HeartRateMonitor Device => btHrp;
         public override HRMDeviceFrm DeviceControlForm => btHrpFrm;
-        public override IHRMLogger CSVLogger => csvLogger;
-        public override IHRMLogger XLSXLogger => xlsxLogger;
-        public override IHRMLogger XMLLogger => xmlLogger;
+        public override IHRMFileLogger CSVLogger => csvLogger;
+        public override IHRMFileLogger XLSXLogger => xlsxLogger;
+        public override IHRMFileLogger XMLLogger => xmlLogger;
+        public override IHRMNetLogger UDPLogger => udpLogger;
         public override DeviceConfiguration.DeviceType ConfigEnumerator => DeviceConfiguration.DeviceType.BtHrp;
 
         public BtHrp BtHrp => btHrp;
@@ -78,7 +80,7 @@ namespace MGT.Cardia
 
         }
 
-        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration)
+        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration, LogConfiguration logConfiguration)
         {
             if (deviceConfiguration.BtHrp.DeviceId != null)
             {
@@ -94,6 +96,9 @@ namespace MGT.Cardia
 
             btHrp.CharacteristicIndex = deviceConfiguration.BtHrp.CharacteristicIndex;
             btHrp.InitDelay = deviceConfiguration.BtHrp.InitDelay;
+
+            udpLogger.Address = logConfiguration.Address;
+            udpLogger.Port = logConfiguration.Port;
         }
 
         public override void SaveConfig(DeviceConfiguration deviceConfiguration)

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Net.Sockets;
 
 namespace MGT.HRM.CMS50
 {
-    public class CMS50LoggerCSV : CMS50FileLogger
+    public class CMS50LoggerUDP : CMS50NetLogger
     {
         private string delimiter = ";";
         public string Delimiter
@@ -24,7 +25,8 @@ namespace MGT.HRM.CMS50
             }
         }
 
-        private StreamWriter streamWriter;
+        private long packetIndex;
+        private UdpClient udpClient;
 
         // 1 - Timestamp
         // 2 - Heart beat
@@ -38,27 +40,8 @@ namespace MGT.HRM.CMS50
 
         protected override void CMS50Start()
         {
-            streamWriter = new StreamWriter(fileName);
-            StringBuilder sb = new StringBuilder();
-            sb.Append("Timestamp");
-            sb.Append(delimiter);
-            sb.Append("Heart beat");
-            sb.Append(delimiter);
-            sb.Append("Heart rate");
-            sb.Append(delimiter);
-            sb.Append("Min heart rate");
-            sb.Append(delimiter);
-            sb.Append("Max heart rate");
-            sb.Append(delimiter);
-            sb.Append("SpO2");
-            sb.Append(delimiter);
-            sb.Append("Min SpO2");
-            sb.Append(delimiter);
-            sb.Append("Max SpO2");
-            sb.Append(delimiter);
-            sb.Append("Waveform");
-            sb.Append(delimiter);
-            streamWriter.WriteLine(sb.ToString());
+            packetIndex = 0;
+            udpClient = new UdpClient(0);
         }
 
         protected override void CMS50Stop()
@@ -74,6 +57,8 @@ namespace MGT.HRM.CMS50
                 return;
 
             StringBuilder sb = new StringBuilder();
+            sb.Append((packetIndex++).ToString());
+            sb.Append(delimiter);
             sb.Append(timestamp.ToString());
             sb.Append(delimiter);
             sb.Append(cms50.HeartBeats.ToString());
@@ -92,14 +77,16 @@ namespace MGT.HRM.CMS50
             sb.Append(delimiter);
             sb.Append(cms50Packet.Waveform.ToString());
             sb.Append(delimiter);
+            sb.Append(Environment.NewLine);
 
-            streamWriter.WriteLine(sb.ToString());
+            byte[] payload = Encoding.UTF8.GetBytes(sb.ToString());
+
+            udpClient.Send(payload, payload.Length, this.ipAddress, this.destinationPort);
         }
 
         public override void Dispose()
         {
-            streamWriter.Close();
-            streamWriter.Dispose();
+            udpClient.Close();
         }
     }
 }

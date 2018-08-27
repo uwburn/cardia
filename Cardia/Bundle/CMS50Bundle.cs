@@ -17,6 +17,7 @@ namespace MGT.Cardia
         private readonly CMS50LoggerCSV csvLogger = new CMS50LoggerCSV();
         private readonly CMS50LoggerXLSX xlsxLogger = new CMS50LoggerXLSX();
         private readonly CMS50LoggerXML xmlLogger = new CMS50LoggerXML();
+        private readonly CMS50LoggerUDP udpLogger = new CMS50LoggerUDP();
 
         public CMS50Bundle()
         {
@@ -32,9 +33,10 @@ namespace MGT.Cardia
 
         public override HeartRateMonitor Device => cms50;
         public override HRMDeviceFrm DeviceControlForm => cms50Frm;
-        public override IHRMLogger CSVLogger => csvLogger;
-        public override IHRMLogger XLSXLogger => xlsxLogger;
-        public override IHRMLogger XMLLogger => xmlLogger;
+        public override IHRMFileLogger CSVLogger => csvLogger;
+        public override IHRMFileLogger XLSXLogger => xlsxLogger;
+        public override IHRMFileLogger XMLLogger => xmlLogger;
+        public override IHRMNetLogger UDPLogger => udpLogger;
         public override DeviceConfiguration.DeviceType ConfigEnumerator => DeviceConfiguration.DeviceType.CMS50;
 
         public CMS50 CMS50 => cms50;
@@ -53,7 +55,7 @@ namespace MGT.Cardia
             }
         }
 
-        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration)
+        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration, LogConfiguration logConfiguration)
         {
             if (SerialPorts.Count > 0)
             {
@@ -73,6 +75,9 @@ namespace MGT.Cardia
                     cms50.SerialPort = SerialPorts[0];
                 }
             }
+
+            udpLogger.Address = logConfiguration.Address;
+            udpLogger.Port = logConfiguration.Port;
         }
 
         public override void SaveConfig(DeviceConfiguration deviceConfiguration)

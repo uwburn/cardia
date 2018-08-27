@@ -12,10 +12,6 @@ namespace MGT.HRM
 
         bool Running { get; }
 
-        event GenericEventHandler<string> FileNameChanged;
-
-        string FileName { get; set; }
-
         void Start(HeartRateMonitor hrm);
 
         void Stop();

@@ -7,7 +7,7 @@ using OfficeOpenXml;
 
 namespace MGT.HRM.CMS50
 {
-    public class CMS50LoggerXLSX : CMS50Logger
+    public class CMS50LoggerXLSX : CMS50FileLogger
     {
         Stream stream;
         ExcelPackage excelPackage;

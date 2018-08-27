@@ -7,7 +7,7 @@ using System.IO;
 
 namespace MGT.HRM.HRP
 {
-    public class BtHrpLoggerXML : BtHrpLogger
+    public class BtHrpLoggerXML : BtHrpFileLogger
     {
         XmlWriter xmlWriter;
         int heartbeats;

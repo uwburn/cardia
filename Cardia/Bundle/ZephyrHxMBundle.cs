@@ -17,6 +17,7 @@ namespace MGT.Cardia
         private readonly ZephyrHxMLoggerCSV csvLogger = new ZephyrHxMLoggerCSV();
         private readonly ZephyrHxMLoggerXLSX xlsxLogger = new ZephyrHxMLoggerXLSX();
         private readonly ZephyrHxMLoggerXML xmlLogger = new ZephyrHxMLoggerXML();
+        private readonly ZephyrHxMLoggerUDP udpLogger = new ZephyrHxMLoggerUDP();
 
         public ZephyrHxMBundle()
         {
@@ -32,9 +33,10 @@ namespace MGT.Cardia
 
         public override HeartRateMonitor Device => zephyrHxM;
         public override HRMDeviceFrm DeviceControlForm => zephyrHxMFrm;
-        public override IHRMLogger CSVLogger => csvLogger;
-        public override IHRMLogger XLSXLogger => xlsxLogger;
-        public override IHRMLogger XMLLogger => xmlLogger;
+        public override IHRMFileLogger CSVLogger => csvLogger;
+        public override IHRMFileLogger XLSXLogger => xlsxLogger;
+        public override IHRMFileLogger XMLLogger => xmlLogger;
+        public override IHRMNetLogger UDPLogger => udpLogger;
         public override DeviceConfiguration.DeviceType ConfigEnumerator => DeviceConfiguration.DeviceType.ZephyrHxM;
 
         public ZephyrHxM ZephyrHxM => zephyrHxM;
@@ -53,7 +55,7 @@ namespace MGT.Cardia
             }
         }
 
-        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration)
+        public override void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration, LogConfiguration logConfiguration)
         {
             if (SerialPorts.Count > 0)
             {
@@ -73,6 +75,9 @@ namespace MGT.Cardia
                     zephyrHxM.SerialPort = SerialPorts[0];
                 }
             }
+
+            udpLogger.Address = logConfiguration.Address;
+            udpLogger.Port = logConfiguration.Port;
         }
 
         public override void SaveConfig(DeviceConfiguration deviceConfiguration)

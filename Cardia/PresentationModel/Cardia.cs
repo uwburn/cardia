@@ -375,7 +375,7 @@ namespace MGT.Cardia
         {
             foreach (Bundle b in Bundles)
             {
-                b.LoadConfig(configuration.Device);
+                b.LoadConfig(configuration.Device, configuration.Log);
                 if (b.ConfigEnumerator == configuration.Device.Type)
                 {
                     bundle = b;
@@ -409,6 +409,22 @@ namespace MGT.Cardia
             location = configuration.WindowLocation;
 
             logFormat = configuration.Log.Format;
+
+            switch(logFormat)
+            {
+                case LogFormat.CSV:
+                    logger = bundle.CSVLogger;
+                    break;
+                case LogFormat.XML:
+                    logger = bundle.XMLLogger;
+                    break;
+                case LogFormat.XLSX:
+                    logger = bundle.XLSXLogger;
+                    break;
+                case LogFormat.UDP:
+                    logger = bundle.UDPLogger;
+                    break;
+            }
         }
 
         private void FireEventChain()
@@ -454,6 +470,9 @@ namespace MGT.Cardia
 
             if (LogFormatChanged != null)
                 LogFormatChanged(this, logFormat);
+
+            if (LoggerChanged != null)
+                LoggerChanged(this, logger);
 
             if (NetworkModeChanged != null)
                 NetworkModeChanged(this, networkMode);
@@ -563,6 +582,12 @@ namespace MGT.Cardia
 
             configuration.Log.Format = logFormat;
 
+            if (logger is IHRMNetLogger)
+            {
+                configuration.Log.Address = ((IHRMNetLogger)logger).Address;
+                configuration.Log.Port = ((IHRMNetLogger)logger).Port;
+            }
+
             configuration.Network.Mode = networkMode;
 
             if (networkRelay is TcpRelayClient<HeartRateMessage>)
@@ -658,6 +683,9 @@ namespace MGT.Cardia
                     break;
                 case LogFormat.XML:
                     Logger = bundle.XMLLogger;
+                    break;
+                case LogFormat.UDP:
+                    Logger = bundle.UDPLogger;
                     break;
             }
         }

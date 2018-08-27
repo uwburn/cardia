@@ -7,7 +7,7 @@ using OfficeOpenXml;
 
 namespace MGT.HRM.HRP
 {
-    public class BtHrpLoggerXLSX : BtHrpLogger
+    public class BtHrpLoggerXLSX : BtHrpFileLogger
     {
         Stream stream;
         ExcelPackage excelPackage;

@@ -7,6 +7,6 @@ namespace MGT.HRM
 {
     public enum LogFormat
     {
-        CSV, XLSX, XML
+        CSV, XLSX, XML, UDP
     }
 }

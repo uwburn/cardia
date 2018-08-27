@@ -13,9 +13,10 @@ namespace MGT.Cardia
     {
         public abstract HeartRateMonitor Device { get; }
         public abstract HRMDeviceFrm DeviceControlForm { get; }
-        public abstract IHRMLogger CSVLogger { get; }
-        public abstract IHRMLogger XLSXLogger { get; }
-        public abstract IHRMLogger XMLLogger { get; }
+        public abstract IHRMFileLogger CSVLogger { get; }
+        public abstract IHRMFileLogger XLSXLogger { get; }
+        public abstract IHRMFileLogger XMLLogger { get; }
+        public abstract IHRMNetLogger UDPLogger { get; }
         public abstract DeviceConfiguration.DeviceType ConfigEnumerator { get; }
 
         public event GenericEventHandler Started;
@@ -23,7 +24,7 @@ namespace MGT.Cardia
 
         public abstract void InitDevice();
         public abstract void InitControlForm();
-        public abstract void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration);
+        public abstract void LoadConfig(Configuration.DeviceConfiguration deviceConfiguration, Configuration.LogConfiguration logConfiguration);
         public abstract void SaveConfig(Configuration.DeviceConfiguration deviceConfiguration);
 
         public void RegisterCardiaEventHandlers(Cardia cardia)
