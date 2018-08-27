@@ -1,37 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using MGT.HRM;
 using MGT.HRM.HRP;
-using System.IO.Ports;
-using MGT.Utilities.EventHandlers;
 using Windows.Devices.Enumeration;
-using System.Diagnostics;
+using MGT.HRM;
 
 namespace MGT.Cardia
 {
     public partial class BtHrpFrm : HRMDeviceFrm
     {
-        private Cardia cardia;
         private BtHrp btHrp;
         DeviceInformationCollection devices;
 
-        public BtHrpFrm(Cardia cardia)
+        public BtHrpFrm(BtHrpBundle bundle)
         {
             InitializeComponent();
 
-            this.cardia = cardia;
-            this.btHrp = (BtHrp)cardia.HRM;
-            devices = cardia.BtSmartDevices;
+            btHrp = bundle.BtHrp;
+            devices = bundle.BtSmartDevices;
 
-            cardia.Started += cardia_Started;
-            cardia.Stopped += cardia_Stopped;
-            cardia.PacketProcessed += cardia_OnPacketProcessed;
+            bundle.Started += bundle_Started;
+            bundle.Stopped += bundle_Stopped;
+            btHrp.PacketProcessed += btHrp_OnPacketProcessed;
             btHrp.DeviceChanged += btHrp_DeviceChanged;
             btHrp.CharacteristicIndexChanged += btHrp_CharacteristicIndexChanged;
             btHrp.InitDelayChanged += btHrp_InitDelayChanged;
@@ -62,7 +51,7 @@ namespace MGT.Cardia
             nudInitDelay.Value = btHrp.InitDelay;
         }
 
-        void cardia_Started(object sender)
+        void bundle_Started(object sender)
         {
             if (this.IsHandleCreated)
             {
@@ -77,7 +66,7 @@ namespace MGT.Cardia
             }
         }
 
-        void cardia_Stopped(object sender)
+        void bundle_Stopped(object sender)
         {
             if (this.IsHandleCreated)
             {
@@ -111,9 +100,10 @@ namespace MGT.Cardia
         public override void ResetUI()
         {
             cbDevices.Enabled = true;
+            tbHeartRate.Text = string.Empty;
         }
 
-        public void cardia_OnPacketProcessed(object sender, HRMStatus status)
+        public void btHrp_OnPacketProcessed(object sender, PacketProcessedEventArgs status)
         {
             if (this.IsHandleCreated)
             {

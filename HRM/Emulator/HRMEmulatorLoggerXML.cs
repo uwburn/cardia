@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace MGT.HRM.Emulator
 {
-    public class HRMEmulatorLoggerXML : HRMEmulatorLogger
+    public class HRMEmulatorLoggerXML : HRMEmulatorFileLogger
     {
         XmlWriter xmlWriter;
         int heartbeats;

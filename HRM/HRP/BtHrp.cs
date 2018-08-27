@@ -187,10 +187,10 @@ namespace MGT.HRM.HRP
             timeoutTimer.Start();
             Running = true;
 
-            ConfigureServiceForNotificationsAsync();
+            await ConfigureServiceForNotificationsAsync();
         }
 
-        private async void ConfigureServiceForNotificationsAsync()
+        private async Task ConfigureServiceForNotificationsAsync()
         {          
             try
             {
@@ -205,7 +205,8 @@ namespace MGT.HRM.HRP
 #if DEBUG
                 logger.Debug("Getting HeartRateMeasurement GattCharacteristic " + characteristicIndex);
 #endif
-                characteristic = service.GetCharacteristics(GattCharacteristicUuids.HeartRateMeasurement)[characteristicIndex];
+                GattCharacteristicsResult result = await service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.HeartRateMeasurement);
+                characteristic = result.Characteristics[characteristicIndex];
 
                 // While encryption is not required by all devices, if encryption is supported by the device,
                 // it can be enabled by setting the ProtectionLevel property of the Characteristic object.

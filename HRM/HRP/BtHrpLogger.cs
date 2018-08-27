@@ -19,29 +19,6 @@ namespace MGT.HRM.HRP
             }
         }
 
-        public event GenericEventHandler<string> FileNameChanged;
-
-        protected string fileName;
-        public string FileName
-        {
-            get
-            {
-                return fileName;
-            }
-            set
-            {
-                if (running)
-                    throw new Exception("Filename cannot be changed when the logger is running");
-
-                string bck = fileName;
-
-                fileName = value;
-                if (bck != value)
-                    if (FileNameChanged != null)
-                        FileNameChanged(this, value);
-            }
-        }
-
         protected BtHrp btHrp;
 
         public void Start(HeartRateMonitor hrm)
@@ -87,10 +64,9 @@ namespace MGT.HRM.HRP
             BtHrpLog(btHrpPacket);
         }
 
-        public void ResetSubscriptions()
+        public virtual void ResetSubscriptions()
         {
             LoggerStatusChanged = null;
-            FileNameChanged = null;
         }
 
         protected abstract void BtHrpLog(BtHrpPacket btHrpPacket);

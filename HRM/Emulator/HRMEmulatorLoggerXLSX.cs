@@ -8,7 +8,7 @@ using OfficeOpenXml;
 
 namespace MGT.HRM.Emulator
 {
-    public class HRMEmulatorLoggerXLSX : HRMEmulatorLogger
+    public class HRMEmulatorLoggerXLSX : HRMEmulatorFileLogger
     {
         Stream stream;
         ExcelPackage excelPackage;

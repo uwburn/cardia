@@ -17,6 +17,7 @@ namespace MGT.Cardia
         #region Fields
 
         private Cardia cardia;
+        private Bundle bundle;
 
         List<ToolStripMenuItem> deviceMenuItems = new List<ToolStripMenuItem>();
 
@@ -39,7 +40,7 @@ namespace MGT.Cardia
             InitializeComponent();
 
             cardia.StatusChanged += cardia_StatusChanged;
-            cardia.DeviceChanged += cardia_DeviceChanged;
+            cardia.BundleChanged += cardia_BundleChanged;
             cardia.ColorChanged += cardia_ColorChanged;
             cardia.ChartTimeChanged += cardia_ChartTimeChanged;
             cardia.VolumeChanged += cardia_VolumeChanged;
@@ -66,12 +67,12 @@ namespace MGT.Cardia
 
         private void InitializeDevices()
         {
-            foreach (HeartRateMonitor hrm in cardia.Devices)
+            foreach (Bundle bundle in cardia.Bundles)
             {
                 ToolStripMenuItem item = new ToolStripMenuItem();
-                item.Text = hrm.Name;
+                item.Text = bundle.Device.Name;
                 item.Click += new EventHandler(miDevicesItem_Clicked);
-                item.Tag = hrm;
+                item.Tag = bundle;
                 miDevice.DropDownItems.Insert(miDevice.DropDownItems.Count - 2, item);
                 deviceMenuItems.Add(item);
             }
@@ -105,12 +106,13 @@ namespace MGT.Cardia
             }
         }
 
-        void cardia_DeviceChanged(object sender, HeartRateMonitor device)
+        void cardia_BundleChanged(object sender, Bundle newBundle)
         {
-            ResetUI();
+            if (bundle != null)
+                bundle.DeviceControlForm.Hide();
 
-            if (devicePanel != null)
-                devicePanel.Close();
+            bundle = newBundle;
+            ResetUI();
 
             foreach (ToolStripItem item in miDevice.DropDownItems)
             {
@@ -119,31 +121,20 @@ namespace MGT.Cardia
 
                 ToolStripMenuItem menuItem = (ToolStripMenuItem)item;
 
-                if (menuItem.Tag == device)
+                if (menuItem.Tag == newBundle)
                     menuItem.Checked = true;
                 else
                     menuItem.Checked = false;
             }
 
-            if (device is ZephyrHxM)
+            try
             {
-                if (!InitializeZephyHxMPanel())
-                    return;
+                newBundle.InitControlForm();
             }
-            else if (device is CMS50)
+            catch (Exception e)
             {
-                if (!InitializeCMS50Panel())
-                    return;
-            }
-            else if (device is BtHrp)
-            {
-                if (!InitializeBtHrpPanel())
-                    return;
-            }
-            else if (device is HRMEmulator)
-            {
-                if (!InitializeHRMEmulatorPanel())
-                    return;
+                tslStatus.Text = e.Message;
+                LockUI();
             }
         }
 
@@ -262,7 +253,7 @@ namespace MGT.Cardia
         {
             ToolStripMenuItem menuItem = (ToolStripMenuItem)sender;
             menuItem.Checked = true;
-            cardia.HRM = (HeartRateMonitor)menuItem.Tag;
+            cardia.Bundle = (Bundle)menuItem.Tag;
         }
 
         private void miSoundPlayBeat_Click(object sender, EventArgs e)
@@ -369,8 +360,7 @@ namespace MGT.Cardia
             miDeviceConfigure.Enabled = true;
             btnStartStop.Enabled = true;
             
-            if (devicePanel != null)
-                devicePanel.ResetUI();
+            bundle.DeviceControlForm.ResetUI();
         }
 
         private void btnStartStop_Click(object sender, EventArgs e)
@@ -398,11 +388,8 @@ namespace MGT.Cardia
 
         private void miDeviceConfigure_Click(object sender, EventArgs e)
         {
-            if (devicePanel == null)
-                return;
-
-            devicePanel.Show();
-            devicePanel.Focus();
+            bundle.DeviceControlForm.Show();
+            bundle.DeviceControlForm.Focus();
         }
 
         private void flpClients_Resize(object sender, EventArgs e)
@@ -513,61 +500,6 @@ namespace MGT.Cardia
         }
 
         #endregion
-
-        #endregion
-
-        #region Device panels
-
-        HRMDeviceFrm devicePanel;
-
-        private bool InitializeZephyHxMPanel()
-        {
-            if (cardia.SerialPorts.Count == 0)
-            {
-                tslStatus.Text = "No serial port found";
-                LockUI();
-                return false;
-            }
-
-            ZephyrHxM zephyrHxM = (ZephyrHxM)cardia.HRM;
-
-            devicePanel = new ZephyrHxMFrm(cardia);
-
-            return true;
-        }
-
-        private bool InitializeCMS50Panel()
-        {
-            if (cardia.SerialPorts.Count == 0)
-            {
-                tslStatus.Text = "No serial port found";
-                LockUI();
-                return false;
-            }
-
-            CMS50 cms50 = (CMS50)cardia.HRM;
-
-            devicePanel = new CMS50Frm(cardia);
-
-            return true;
-        }
-
-        private bool InitializeBtHrpPanel()
-        {
-            BtHrp btHrp = (BtHrp)cardia.HRM;
-
-            devicePanel = new BtHrpFrm(cardia);
-
-            return true;
-        }
-
-        private bool InitializeHRMEmulatorPanel()
-        {
-            HRMEmulator hrmEmulator = (HRMEmulator)cardia.HRM;
-            devicePanel = new HRMEmulatorFrm(cardia);
-
-            return true;
-        }
 
         #endregion
 

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Net.Sockets;
 
 namespace MGT.HRM.Emulator
 {
-    public class HRMEmulatorLoggerCSV : HRMEmulatorFileLogger
+    public class HRMEmulatorLoggerUDP : HRMEmulatorNetLogger
     {
         private string delimiter = ";";
         public string Delimiter
@@ -24,7 +25,8 @@ namespace MGT.HRM.Emulator
             }
         }
 
-        private StreamWriter streamWriter;
+        private long packetIndex;
+        private UdpClient udpClient;
 
         // 1 - Timestamp
         // 2 - Heart beat
@@ -34,19 +36,8 @@ namespace MGT.HRM.Emulator
 
         protected override void HRMEmulatorStart()
         {
-            streamWriter = new StreamWriter(fileName);
-            StringBuilder sb = new StringBuilder();
-            sb.Append("Timestamp");
-            sb.Append(delimiter);
-            sb.Append("Heart beat");
-            sb.Append(delimiter);
-            sb.Append("Heart rate");
-            sb.Append(delimiter);
-            sb.Append("Min heart rate");
-            sb.Append(delimiter);
-            sb.Append("Max heart rate");
-            sb.Append(delimiter);
-            streamWriter.WriteLine(sb.ToString());
+            packetIndex = 0;
+            udpClient = new UdpClient(0);
         }
 
         protected override void HRMEmulatorStop()
@@ -62,6 +53,8 @@ namespace MGT.HRM.Emulator
                 return;
 
             StringBuilder sb = new StringBuilder();
+            sb.Append((packetIndex++).ToString());
+            sb.Append(delimiter);
             sb.Append(timestamp.ToString());
             sb.Append(delimiter);
             sb.Append(hrmEmulator.HeartBeats.ToString());
@@ -72,14 +65,16 @@ namespace MGT.HRM.Emulator
             sb.Append(delimiter);
             sb.Append(hrmEmulator.MaxHeartRate.ToString());
             sb.Append(delimiter);
+            sb.Append(Environment.NewLine);
 
-            streamWriter.WriteLine(sb.ToString());
+            byte[] payload = Encoding.UTF8.GetBytes(sb.ToString());
+
+            udpClient.Send(payload, payload.Length, this.ipAddress, this.destinationPort);
         }
 
         public override void Dispose()
         {
-            streamWriter.Close();
-            streamWriter.Dispose();
+            udpClient.Close();
         }
     }
 }

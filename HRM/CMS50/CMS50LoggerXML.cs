@@ -7,7 +7,7 @@ using System.IO;
 
 namespace MGT.HRM.CMS50
 {
-    public class CMS50LoggerXML : CMS50Logger
+    public class CMS50LoggerXML : CMS50FileLogger
     {
         XmlWriter xmlWriter;
         int heartbeats;

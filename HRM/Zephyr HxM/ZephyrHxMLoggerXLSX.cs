@@ -7,7 +7,7 @@ using OfficeOpenXml;
 
 namespace MGT.HRM.Zephyr_HxM
 {
-    public class ZephyrHxMLoggerXLSX : ZephyrHxMLogger
+    public class ZephyrHxMLoggerXLSX : ZephyrHxMFileLogger
     {
         Stream stream;
         ExcelPackage excelPackage;

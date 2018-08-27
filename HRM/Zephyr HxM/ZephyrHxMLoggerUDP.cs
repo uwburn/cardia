@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Net.Sockets;
 
 namespace MGT.HRM.Zephyr_HxM
 {
-    public class ZephyrHxMLoggerCSV : ZephyrHxMFileLogger
+    public class ZephyrHxMLoggerUDP : ZephyrHxMNetLogger
     {
         private string delimiter = ";";
         public string Delimiter
@@ -24,7 +25,8 @@ namespace MGT.HRM.Zephyr_HxM
             }
         }
 
-        private StreamWriter streamWriter;
+        private long packetIndex;
+        private UdpClient udpClient;
 
         // 1 - Timestamp
         // 2 - Heart beat
@@ -35,21 +37,8 @@ namespace MGT.HRM.Zephyr_HxM
 
         protected override void ZephyrStart()
         {
-            streamWriter = new StreamWriter(fileName);
-            StringBuilder sb = new StringBuilder();
-            sb.Append("Timestamp");
-            sb.Append(delimiter);
-            sb.Append("Heart beat");
-            sb.Append(delimiter);
-            sb.Append("Heart rate");
-            sb.Append(delimiter);
-            sb.Append("Min heart rate");
-            sb.Append(delimiter);
-            sb.Append("Max heart rate");
-            sb.Append(delimiter);
-            sb.Append("RR interval");
-            sb.Append(delimiter);
-            streamWriter.WriteLine(sb.ToString());
+            packetIndex = 0;
+            udpClient = new UdpClient(0);
         }
 
         protected override void ZephyrStop()
@@ -73,6 +62,8 @@ namespace MGT.HRM.Zephyr_HxM
         private void write(ZephyrPacket zephyrPacket, int index, DateTime timestamp)
         {
             StringBuilder sb = new StringBuilder();
+            sb.Append((packetIndex++).ToString());
+            sb.Append(delimiter);
             sb.Append(timestamp.ToString());
             sb.Append(delimiter);
             sb.Append(zephyrHxM.HeartBeats.ToString());
@@ -85,14 +76,16 @@ namespace MGT.HRM.Zephyr_HxM
             sb.Append(delimiter);
             sb.Append(zephyrPacket.rrIntervals[index].ToString());
             sb.Append(delimiter);
+            sb.Append(Environment.NewLine);
 
-            streamWriter.WriteLine(sb.ToString());
+            byte[] payload = Encoding.UTF8.GetBytes(sb.ToString());
+
+            udpClient.Send(payload, payload.Length, this.ipAddress, this.destinationPort);
         }
 
         public override void Dispose()
         {
-            streamWriter.Close();
-            streamWriter.Dispose();
+            udpClient.Close();
         }
     }
 }

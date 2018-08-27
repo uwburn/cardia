@@ -36,14 +36,14 @@ namespace MGT.Cardia
 
         void networkTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (!cardia.HRM.Running)
+            if (!cardia.Bundle.Device.Running)
                 return;
 
-            if (cardia.HRM.LastPacket == null)
+            if (cardia.Bundle.Device.LastPacket == null)
                 return;
 
             if (PacketSampled != null)
-                PacketSampled(this, cardia.HRM.LastPacket, cardia.HRM.MinHeartRate, cardia.HRM.MaxHeartRate);
+                PacketSampled(this, cardia.Bundle.Device.LastPacket, cardia.Bundle.Device.MinHeartRate, cardia.Bundle.Device.MaxHeartRate);
         }
     }
 }

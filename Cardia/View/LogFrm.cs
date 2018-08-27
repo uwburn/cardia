@@ -26,6 +26,7 @@ namespace MGT.Cardia
 
             cardia_LoggerChanged(this, cardia.LogFormat);
 
+            cardia.LoggerChanged += Cardia_LoggerChanged;
             cardia.LogEnabledChanged += cardia_LogEnabledChanged;
             cardia.LogFormatChanged += cardia_LoggerChanged;
 
@@ -33,6 +34,20 @@ namespace MGT.Cardia
             rbLogCSV_CheckedChanged(this, null);
             rbLogXLSX_CheckedChanged(this, null);
             rbLogXML_CheckedChanged(this, null);
+            rbLogUDP_CheckedChanged(this, null);
+        }
+
+        private void Cardia_LoggerChanged(object sender, IHRMLogger arg)
+        {
+            if (arg is IHRMNetLogger)
+            {
+                tbIpAddress.Text = ((IHRMNetLogger)arg).Address;
+                nudPort.Value = ((IHRMNetLogger)arg).Port;
+            }
+            else if (arg is IHRMFileLogger)
+            {
+                tbLogFile.Text = ((IHRMFileLogger)arg).FileName;
+            }
         }
 
         void cardia_LogEnabledChanged(object sender, bool enabled)
@@ -53,7 +68,12 @@ namespace MGT.Cardia
                 case LogFormat.XML:
                     rbLogXML.Checked = true;
                     break;
+                case LogFormat.UDP:
+                    rbLogUDP.Checked = true;
+                    break;
             }
+
+            LogTypeUI();
         }
 
         private void Log_FormClosing(object sender, FormClosingEventArgs e)
@@ -102,6 +122,17 @@ namespace MGT.Cardia
             tbLogDestination_TextChanged(this, null);
         }
 
+        private void rbLogUDP_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!rbLogUDP.Checked)
+                return;
+
+            cardia.LogFormat = LogFormat.UDP;
+
+            tbIpAddress_TextChanged(this, null);
+            nudPort_ValueChanged(this, null);
+        }
+
         private void cbLogEnable_CheckedChanged(object sender, EventArgs e)
         {
             cardia.LogEnabled = cbLogEnable.Checked;
@@ -112,9 +143,7 @@ namespace MGT.Cardia
                 rbLogCSV.Enabled = true;
                 rbLogXLSX.Enabled = true;
                 rbLogXML.Enabled = true;
-                lbLogDestination.Enabled = true;
-                tbLogDestination.Enabled = true;
-                btnLogDestination.Enabled = true;
+                rbLogUDP.Enabled = true;
             }
             else
             {
@@ -122,15 +151,15 @@ namespace MGT.Cardia
                 rbLogCSV.Enabled = false;
                 rbLogXLSX.Enabled = false;
                 rbLogXML.Enabled = false;
-                lbLogDestination.Enabled = false;
-                tbLogDestination.Enabled = false;
-                btnLogDestination.Enabled = false;
+                rbLogUDP.Enabled = false;
             }
+
+            LogTypeUI();
         }
 
         private void sfdDestination_FileOk(object sender, CancelEventArgs e)
         {
-            tbLogDestination.Text = sfdDestination.FileName;
+            tbLogFile.Text = sfdDestination.FileName;
         }
 
         private void btnLogDestination_Click(object sender, EventArgs e)
@@ -146,7 +175,37 @@ namespace MGT.Cardia
         private void tbLogDestination_TextChanged(object sender, EventArgs e)
         {
             if (cardia.Logger != null)
-                cardia.Logger.FileName = tbLogDestination.Text;
+            {
+                if (cardia.Logger is IHRMFileLogger)
+                {
+                    IHRMFileLogger fileLogger = (IHRMFileLogger)cardia.Logger;
+                    fileLogger.FileName = tbLogFile.Text;
+                }
+            }
+        }
+
+        private void tbIpAddress_TextChanged(object sender, EventArgs e)
+        {
+            if (cardia.Logger != null)
+            {
+                if (cardia.Logger is IHRMNetLogger)
+                {
+                    IHRMNetLogger netLogger = (IHRMNetLogger)cardia.Logger;
+                    netLogger.Address = tbIpAddress.Text;
+                }
+            }
+        }
+
+        private void nudPort_ValueChanged(object sender, EventArgs e)
+        {
+            if (cardia.Logger != null)
+            {
+                if (cardia.Logger is IHRMNetLogger)
+                {
+                    IHRMNetLogger netLogger = (IHRMNetLogger)cardia.Logger;
+                    netLogger.Port = Convert.ToInt32(nudPort.Value);
+                }
+            }
         }
 
         public void LockUI()
@@ -157,9 +216,52 @@ namespace MGT.Cardia
             rbLogCSV.Enabled = false;
             rbLogXLSX.Enabled = false;
             rbLogXML.Enabled = false;
-            lbLogDestination.Enabled = false;
-            tbLogDestination.Enabled = false;
+            rbLogUDP.Enabled = false;
+            lbLogFile.Enabled = false;
+            tbLogFile.Enabled = false;
+            lbIpAddress.Enabled = false;
+            tbIpAddress.Enabled = false;
+            lbPort.Enabled = false;
+            nudPort.Enabled = false;
             btnLogDestination.Enabled = false;
+        }
+
+        private void LogTypeUI()
+        {
+            bool fileLogger = false;
+            bool netLogger = false;
+            switch (cardia.LogFormat)
+            {
+                case LogFormat.CSV:
+                case LogFormat.XLSX:
+                case LogFormat.XML:
+                    fileLogger = true;
+                    break;
+                case LogFormat.UDP:
+                    netLogger = true;
+                    break;
+            }
+
+            if (cardia.LogEnabled)
+            {
+                lbLogFile.Enabled = fileLogger;
+                tbLogFile.Enabled = fileLogger;
+                lbIpAddress.Enabled = netLogger;
+                tbIpAddress.Enabled = netLogger;
+                lbPort.Enabled = netLogger;
+                nudPort.Enabled = netLogger;
+                btnLogDestination.Enabled = fileLogger;
+            }
+            else
+            {
+                lbLogFile.Enabled = false;
+                tbLogFile.Enabled = false;
+                lbIpAddress.Enabled = false;
+                tbIpAddress.Enabled = false;
+                lbPort.Enabled = false;
+                nudPort.Enabled = false;
+                btnLogDestination.Enabled = false;
+            }
         }
 
         public void ResetUI()

@@ -7,7 +7,7 @@ using System.IO;
 
 namespace MGT.HRM.Zephyr_HxM
 {
-    public class ZephyrHxMLoggerXML : ZephyrHxMLogger
+    public class ZephyrHxMLoggerXML : ZephyrHxMFileLogger
     {
         XmlWriter xmlWriter;
         int heartbeats;
