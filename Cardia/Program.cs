@@ -108,7 +108,7 @@ namespace MGT.Cardia
 
             /*if (DateTime.Today > cardia.ExpiryDate)
             {
-                MessageBox.Show("This development preview release has expired.\nPlease download a new release from http://www.altairgarden.it/", "Release expired", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("This development preview release has expired."\nPlease download a new release from http://www.altairgarden.it/", "Release expired", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }*/
 

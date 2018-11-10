@@ -13,7 +13,7 @@ namespace MGT.Cardia
     {
         #region Fields & constants
 
-        /*public readonly DateTime ExpiryDate = new DateTime(2015, 12, 31);*/
+        // public readonly DateTime ExpiryDate = new DateTime(2018, 12, 01);
 
         public readonly Configuration configuration;
 
