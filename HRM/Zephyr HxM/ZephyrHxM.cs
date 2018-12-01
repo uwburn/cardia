@@ -197,7 +197,7 @@ namespace MGT.HRM.Zephyr_HxM
 #endif
 
                 Stop();
-                FireTimeout("Zephyr HxM not transmitting on serial port " + serialPort.PortName);
+                FireTimeout($"Zephyr HxM not transmitting on serial port {serialPort.PortName}");
             }
         }
 
@@ -264,7 +264,7 @@ namespace MGT.HRM.Zephyr_HxM
             serialPort.Read(bytes, 0, bytes.Length);
 
 #if DEBUG
-            logger.Debug("Equeuing data = " + bytes);
+            logger.Debug($"Equeuing data = {bytes}");
 #endif
 
             foreach (byte b in bytes)
@@ -336,7 +336,7 @@ namespace MGT.HRM.Zephyr_HxM
                 lastPacket = zephyrPacket;
 
 #if DEBUG
-                logger.Debug("Constructed Zephyr HxM packet = " + zephyrPacket);
+                logger.Debug($"Constructed Zephyr HxM packet = {zephyrPacket}");
 #endif
             }
             catch (CorruptedPacketExcpetion e)
@@ -493,7 +493,7 @@ namespace MGT.HRM.Zephyr_HxM
             lastReceivedDate = DateTime.Now;
 
 #if DEBUG
-            logger.Debug("Firing PacketProcessed event, packet = " + LastPacket);
+            logger.Debug($"Firing PacketProcessed event, packet = {LastPacket}");
 #endif
             PacketProcessedEventArgs args = new PacketProcessedEventArgs(LastPacket);
             base.FirePacketProcessed(args);

@@ -195,17 +195,56 @@ namespace MGT.HRM.HRP
             try
             {
 #if DEBUG
-                logger.Debug("Getting GattDeviceService " + device.Name + " with id " + device.Id);
+                logger.Debug($"Getting GattDeviceService {device.Name} with id {device.Id}");
 #endif
                 service = await GattDeviceService.FromIdAsync(device.Id);
                 if (initDelay > 0)
                     await Task.Delay(initDelay);
 
+#if DEBUG
+                if (service != null)
+                {
+                    logger.Debug($"GattDeviceService instatiated successfully");
+
+                    logger.Debug($"GattSession status = {service.Session.SessionStatus}, " +
+                    $"mantain connection = {service.Session.MaintainConnection}, " +
+                    $"can mantain connection = {service.Session.MaintainConnection}");
+                }
+                else
+                {
+                    logger.Debug($"Failed to instantiate GattDeviceService");
+                }
+#endif
+
+                // List all the characteristics of the device
+#if DEBUG
+                logger.Debug("Getting all GattCharacteristic...");
+                GattCharacteristicsResult allResult = await service.GetCharacteristicsAsync();
+                logger.Debug($"GattCharacteristicsResult status {allResult.Status}");
+                foreach (GattCharacteristic allCharacteristic in allResult.Characteristics)
+                {
+                    logger.Debug($"GattCharacteristic {allCharacteristic.Uuid}: " +
+                        $"description = {allCharacteristic.UserDescription}, " +
+                        $"protection level = {allCharacteristic.ProtectionLevel}");
+                }
+#endif
+
                 // Obtain the characteristic for which notifications are to be received
 #if DEBUG
-                logger.Debug("Getting HeartRateMeasurement GattCharacteristic " + characteristicIndex);
+                logger.Debug($"Getting HeartRateMeasurement GattCharacteristic {characteristicIndex}");
 #endif
                 GattCharacteristicsResult result = await service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.HeartRateMeasurement);
+
+#if DEBUG
+                logger.Debug($"GattCharacteristicsResult status {result.Status}");
+                foreach (GattCharacteristic hrCharacteristic in result.Characteristics)
+                {
+                    logger.Debug($"GattCharacteristic {hrCharacteristic.Uuid}: " +
+                        $"description = {hrCharacteristic.UserDescription}, " +
+                        $"protection level = {hrCharacteristic.ProtectionLevel}");
+                }
+#endif
+
                 characteristic = result.Characteristics[characteristicIndex];
 
                 // While encryption is not required by all devices, if encryption is supported by the device,
@@ -279,7 +318,7 @@ namespace MGT.HRM.HRP
         private void Characteristic_ValueChanged(GattCharacteristic sender, GattValueChangedEventArgs args)
         {
 #if DEBUG
-            logger.Debug("GattCharacteristic value changed, args = " + args);
+            logger.Debug($"GattCharacteristic value changed, args = {args}");
 #endif
             byte[] data = new byte[args.CharacteristicValue.Length];
 
@@ -291,7 +330,7 @@ namespace MGT.HRM.HRP
         private void ProcessData(byte[] data, DateTimeOffset timestamp)
         {
 #if DEBUG
-            logger.Debug("Processing HRP payload, data = " + data);
+            logger.Debug($"Processing HRP payload, data = {data}");
 #endif
 
             byte currentOffset = 0;
@@ -331,7 +370,7 @@ namespace MGT.HRM.HRP
             };
 
 #if DEBUG
-            logger.Debug("Constructed HRP packet = " + btHrpPacket);
+            logger.Debug($"Constructed HRP packet = {btHrpPacket}");
 #endif
 
             TotalPackets++;
@@ -395,7 +434,7 @@ namespace MGT.HRM.HRP
             lastReceivedDate = DateTime.Now;
 
 #if DEBUG
-            logger.Debug("Firing PacketProcessed event, packet = " + LastPacket);
+            logger.Debug($"Firing PacketProcessed event, packet = {LastPacket}");
 #endif
             PacketProcessedEventArgs args = new PacketProcessedEventArgs(LastPacket);
             base.FirePacketProcessed(args);
@@ -420,13 +459,13 @@ namespace MGT.HRM.HRP
         private async void DeviceConnection_Updated(PnpObjectWatcher sender, PnpObjectUpdate args)
         {
 #if DEBUG
-            logger.Debug("Device connection updated, args = " + args);
+            logger.Debug($"Device connection updated, args = {args}");
 #endif
 
             var connectedProperty = args.Properties["System.Devices.Connected"];
 
 #if DEBUG
-            logger.Debug("Connected property, args = " + connectedProperty.ToString());
+            logger.Debug($"Connected property, args = {connectedProperty}");
 #endif
 
             bool isConnected = false;

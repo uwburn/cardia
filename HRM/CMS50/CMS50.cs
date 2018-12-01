@@ -195,7 +195,7 @@ namespace MGT.HRM.CMS50
 
                 timeoutTimer.Stop();
                 Stop();
-                FireTimeout("CMS50 not transmitting on serial port " + serialPort.PortName);
+                FireTimeout($"CMS50 not transmitting on serial port ${serialPort.PortName}");
             }
         }
 
@@ -256,7 +256,7 @@ namespace MGT.HRM.CMS50
             serialPort.Read(bytes, 0, bytes.Length);
 
 #if DEBUG
-            logger.Debug("Equeuing data = " + bytes);
+            logger.Debug($"Equeuing data = {bytes}");
 #endif
 
             foreach (byte b in bytes)
@@ -312,7 +312,7 @@ namespace MGT.HRM.CMS50
                 lastPacket = cms50Packet;
 
 #if DEBUG
-                logger.Debug("Constructed CMS50 packet = " + cms50Packet);
+                logger.Debug($"Constructed CMS50 packet = {cms50Packet}");
 #endif
             }
             catch (CorruptedPacketExcpetion e)
@@ -449,7 +449,7 @@ namespace MGT.HRM.CMS50
             lastReceivedDate = DateTime.Now;
 
 #if DEBUG
-            logger.Debug("Firing PacketProcessed event, packet = " + LastPacket);
+            logger.Debug($"Firing PacketProcessed event, packet = {LastPacket}");
 #endif
             PacketProcessedEventArgs args = new PacketProcessedEventArgs(LastPacket);
             base.FirePacketProcessed(args);

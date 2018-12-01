@@ -88,7 +88,7 @@ namespace MGT.HRM.Emulator
             lastPacket = new HRMEmulatorPacket(bpm);
 
 #if DEBUG
-            logger.Debug("Generated emulated packet = " + lastPacket.ToString());
+            logger.Debug($"Generated emulated packet = {lastPacket}");
 #endif
 
             if (MinHeartRate == null)
@@ -142,7 +142,7 @@ namespace MGT.HRM.Emulator
             HeartBeats = (int)heartBeats;
 
 #if DEBUG
-            logger.Debug("Firing PacketProcessed event, packet = " + lastPacket);
+            logger.Debug($"Firing PacketProcessed event, packet = ${lastPacket}");
 #endif
             PacketProcessedEventArgs args2 = new PacketProcessedEventArgs(lastPacket);
             base.FirePacketProcessed(args2);

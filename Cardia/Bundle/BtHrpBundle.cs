@@ -9,11 +9,14 @@ using Windows.Devices.Enumeration;
 using Windows.Devices.Bluetooth.GenericAttributeProfile;
 using System.Threading;
 using static MGT.Cardia.Configuration;
+using log4net;
 
 namespace MGT.Cardia
 {
     public class BtHrpBundle : Bundle
     {
+        private static readonly ILog logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly BtHrp btHrp = new BtHrp();
         private readonly BtHrpFrm btHrpFrm;
         private readonly BtHrpLoggerCSV csvLogger = new BtHrpLoggerCSV();
@@ -25,6 +28,8 @@ namespace MGT.Cardia
 
         public BtHrpBundle()
         {
+            logger.Debug("Retrieving heart rate capable devices");
+
             var task = DeviceInformation.FindAllAsync(
                 GattDeviceService.GetDeviceSelectorFromUuid(GattServiceUuids.HeartRate),
                 new string[] { "System.Devices.ContainerId" });
@@ -33,6 +38,8 @@ namespace MGT.Cardia
             {
                 while (true)
                 {
+                    logger.Debug("Attempting to retrieve async result...");
+
                     Thread.Sleep(100);
 
                     var status = task.Status;
@@ -50,6 +57,16 @@ namespace MGT.Cardia
             finally
             {
                 task.Close();
+            }
+
+            logger.Debug($"Found {BtSmartDevices.Count} heart rate capable deices");
+            foreach (DeviceInformation device in BtSmartDevices.ToList())
+            {
+                logger.Debug($"{device.Name}: " +
+                    $"id = {device.Id}, " +
+                    $"default = {device.IsDefault}, " +
+                    $"enabled = {device.IsEnabled},  " +
+                    $"paired = {device.Pairing.IsPaired}");
             }
 
             if (BtSmartDevices.Count > 0)
