@@ -14,6 +14,7 @@ namespace MGT.Cardia
         #region Fields & constants
 
         // public readonly DateTime ExpiryDate = new DateTime(2018, 12, 01);
+        private readonly String networkVersion = "1.1";
 
         public readonly Configuration configuration;
 
@@ -848,13 +849,13 @@ namespace MGT.Cardia
             networkRelays = new List<NetworkRelay<HeartRateMessage>>();
             TcpRelayClient<HeartRateMessage> client = new TcpRelayClient<HeartRateMessage>();
             client.Timeout = 10000;
-            client.Version = AssemblyAttributes.AssemblyMajorMinorVersion;
+            client.Version = networkVersion;
             networkRelays.Add(client);
 
             TcpRelayServer<HeartRateMessage> server = new TcpRelayServer<HeartRateMessage>();
             server.MaxConnections = 4;
             server.Timeout = 10000;
-            server.Version = AssemblyAttributes.AssemblyMajorMinorVersion;
+            server.Version = networkVersion;
             networkRelays.Add(server);
 
             NetworkMode = configuration.Network.Mode;
