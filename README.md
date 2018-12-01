@@ -114,6 +114,11 @@ If you would like to support me and help me buy the devices to include support f
 - - - -
 
 ### Changelog
+* v1.2 (2018-12-01)
+  * Included UDP logging support
+  * Partial code rewrital to support better modularity
+  * Additional logging instruction to track down BT smart pairing issues
+
 * v1.1 (2018-01-14)
   * Splitted main and legacy version
   * Ensured network compatibility between main and legacy version
