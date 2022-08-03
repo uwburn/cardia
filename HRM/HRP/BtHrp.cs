@@ -263,45 +263,35 @@ namespace MGT.HRM.HRP
 #endif
                 characteristic.ValueChanged += Characteristic_ValueChanged;
 
-                // In order to avoid unnecessary communication with the device, determine if the device is already 
-                // correctly configured to send notifications.
-                // By default ReadClientCharacteristicConfigurationDescriptorAsync will attempt to get the current
-                // value from the system cache and communication with the device is not typically required.
+                // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
+                // when the Characteristic value changes
 #if DEBUG
-                logger.Debug("Reading GattCharacteristic configuration descriptor");
+                logger.Debug("Setting GattCharacteristic configuration descriptor to enable notifications");
 #endif
-                var currentDescriptorValue = await characteristic.ReadClientCharacteristicConfigurationDescriptorAsync();
 
-                if ((currentDescriptorValue.Status != GattCommunicationStatus.Success) ||
-                    (currentDescriptorValue.ClientCharacteristicConfigurationDescriptor != CHARACTERISTIC_NOTIFICATION_TYPE))
+                GattCommunicationStatus status =
+                    await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                    CHARACTERISTIC_NOTIFICATION_TYPE);
+
+                if (status == GattCommunicationStatus.Unreachable)
                 {
-                    // Set the Client Characteristic Configuration Descriptor to enable the device to send notifications
-                    // when the Characteristic value changes
 #if DEBUG
-                    logger.Debug("Setting GattCharacteristic configuration descriptor to enable notifications");
+                    logger.Debug("Device unreachable");
 #endif
-
-                    GattCommunicationStatus status =
-                        await characteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-                        CHARACTERISTIC_NOTIFICATION_TYPE);
-
-                    if (status == GattCommunicationStatus.Unreachable)
-                    {
-#if DEBUG
-                        logger.Debug("Device unreachable");
-#endif
-
-                        // Register a PnpObjectWatcher to detect when a connection to the device is established,
-                        // such that the application can retry device configuration.
-                        StartDeviceConnectionWatcher();
-                    }
+                    // Register a PnpObjectWatcher to detect when a connection to the device is established,
+                    // such that the application can retry device configuration.
+                    StartDeviceConnectionWatcher();
                 }
-                else
-                {
 #if DEBUG
+                else if (status == GattCommunicationStatus.Success)
+                {
                     logger.Debug("Configuration successfull");
-#endif
+
+                    logger.Debug($"GattSession status = {service.Session.SessionStatus}, " +
+                    $"mantain connection = {service.Session.MaintainConnection}, " +
+                    $"can mantain connection = {service.Session.MaintainConnection}");
                 }
+#endif
             }
             catch (Exception e)
             {
