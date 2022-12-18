@@ -114,6 +114,9 @@ If you would like to support me and help me buy the devices to include support f
 - - - -
 
 ### Changelog
+* v1.2.0.1 (2022-08-03)
+  * Change BT HRP initialization sequence (thanks to [@effgenesis](https://www.github.com/effgenesis))
+
 * v1.2 (2018-12-01)
   * Included UDP logging support
   * Partial code rewrital to support better modularity
