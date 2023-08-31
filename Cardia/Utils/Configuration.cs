@@ -83,6 +83,8 @@ namespace MGT.Cardia
 
         public int WindowWidth = 608;
         public Point? WindowLocation = null;
+        public bool AutoStart = false;
+        public bool StartInShrinkMode = false;
         public int ChartTime = 5;
         public int Color = 0;
         public int Volume = 5;

@@ -42,6 +42,8 @@ namespace MGT.Cardia
             cardia.StatusChanged += cardia_StatusChanged;
             cardia.BundleChanged += cardia_BundleChanged;
             cardia.ColorChanged += cardia_ColorChanged;
+            cardia.AutoStartChanged += cardia_AutoStartChanged;
+            cardia.StartShrinkedChanged += cardia_StartShrinkedChanged;
             cardia.ChartTimeChanged += cardia_ChartTimeChanged;
             cardia.VolumeChanged += cardia_VolumeChanged;
             cardia.PlayBeatChanged += cardia_PlayBeatChanged;
@@ -147,6 +149,16 @@ namespace MGT.Cardia
             {
                 clientDisplay.Color = color;
             }
+        }
+
+        void cardia_AutoStartChanged(object sender, bool arg)
+        {
+            toolStripMenuItemAutostart.Checked = arg;
+        }
+
+        void cardia_StartShrinkedChanged(object sender, bool arg)
+        {
+            toolStripMenuItemStartShrinked.Checked = arg;
         }
 
         void cardia_ChartTimeChanged(object sender, int chartTime)
@@ -271,6 +283,16 @@ namespace MGT.Cardia
             cardia.Color = (Color)cbColor.SelectedItem;
         }
 
+        private void toolStripMenuItemAutostart_CheckedChanged(object sender, EventArgs e)
+        {
+            cardia.AutoStart = (sender as ToolStripMenuItem).Checked;
+        }
+
+        private void toolStripMenuItemStartShrinked_CheckedChanged(object sender, EventArgs e)
+        {
+            cardia.StartShrinked = (sender as ToolStripMenuItem).Checked;
+        }
+
         private void nudChartTime_ValueChanged(object sender, EventArgs e)
         {
             int value = Convert.ToInt32(nudChartTime.Value);
@@ -322,6 +344,11 @@ namespace MGT.Cardia
             {
                 startingFormHeightFlag = false;
                 startingFormHeight = this.Height;
+
+                if (cardia.configuration.AutoStart)
+                    Start();
+                if (cardia.configuration.StartInShrinkMode)
+                    shrinkToolStripMenuItem_Click(null, null);
             }
         }
 
@@ -359,7 +386,7 @@ namespace MGT.Cardia
             }
             miDeviceConfigure.Enabled = true;
             btnStartStop.Enabled = true;
-            
+
             bundle.DeviceControlForm.ResetUI();
         }
 

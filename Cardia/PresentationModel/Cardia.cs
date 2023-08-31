@@ -136,6 +136,8 @@ namespace MGT.Cardia
 
         // Fields
         private Color color;
+        private bool autoStart;
+        private bool startShrinked;
         private int chartTime;
         private int width;
         private Point? location;
@@ -146,6 +148,8 @@ namespace MGT.Cardia
         // Events
         public event GenericEventHandler<string, bool> StatusChanged;
         public event GenericEventHandler<Color> ColorChanged;
+        public event GenericEventHandler<bool> AutoStartChanged;
+        public event GenericEventHandler<bool> StartShrinkedChanged;
         public event GenericEventHandler<int> ChartTimeChanged;
         public event GenericEventHandler<int> WidthChanged;
         public event GenericEventHandler<Point?> LocationChanged;
@@ -172,6 +176,34 @@ namespace MGT.Cardia
                 if (value != bck)
                     if (ColorChanged != null)
                         ColorChanged(this, value);
+            }
+        }
+
+        public bool AutoStart
+        {
+            get { return autoStart; }
+            set
+            {
+                bool bck = autoStart;
+                autoStart = value;
+
+                if (bck != value)
+                    if (AutoStartChanged != null)
+                        AutoStartChanged(this, value);
+            }
+        }
+
+        public bool StartShrinked
+        {
+            get { return startShrinked; }
+            set
+            {
+                bool bck = startShrinked;
+                startShrinked = value;
+
+                if (bck != value)
+                    if (StartShrinkedChanged != null)
+                        StartShrinkedChanged(this, value);
             }
         }
 
@@ -359,7 +391,7 @@ namespace MGT.Cardia
             RegisterBundlesEventHandlers();
             LoadConfig();
             if (bundle == null)
-                bundle = Bundles[0];
+                bundle = Bundles[0];       
 
             FireEventChain();
         }
@@ -386,6 +418,10 @@ namespace MGT.Cardia
             RegisterHrmEventHandlers();
 
             color = Colors[configuration.Color];
+
+            autoStart = configuration.AutoStart;
+
+            startShrinked = configuration.StartInShrinkMode;
 
             chartTime = configuration.ChartTime;
 
@@ -435,6 +471,12 @@ namespace MGT.Cardia
 
             if (ColorChanged != null)
                 ColorChanged(this, color);
+
+            if (AutoStartChanged != null)
+                AutoStartChanged(this, autoStart);
+
+            if (StartShrinkedChanged != null)
+                StartShrinkedChanged(this, startShrinked);
 
             if (ChartTimeChanged != null)
                 ChartTimeChanged(this, chartTime);
@@ -556,6 +598,10 @@ namespace MGT.Cardia
         public void SaveConfig()
         {
             configuration.Color = Colors.IndexOf(color);
+
+            configuration.AutoStart = autoStart;
+
+            configuration.StartInShrinkMode = startShrinked;
 
             bundle.SaveConfig(configuration.Device);
 
