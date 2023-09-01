@@ -83,6 +83,10 @@
     <Compile Include="Bundle\Bundle.cs" />
     <Compile Include="Bundle\CMS50Bundle.cs" />
     <Compile Include="Bundle\ZephyrHxMBundle.cs" />
+    <Compile Include="Controls\IColorEditor.cs" />
+    <Compile Include="Controls\ScreenColorPicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Model\HRMAlarm.cs" />
     <Compile Include="View\AboutFrm.cs">
       <SubType>Form</SubType>
@@ -222,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+    <Content Include="Resources\eyedropper.cur" />
     <None Include="Resources\Alarm1.wav" />
     <None Include="Resources\Alarm2.wav" />
     <None Include="Resources\Alarm3.wav" />

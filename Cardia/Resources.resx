@@ -178,6 +178,9 @@
   <data name="Beep9" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\Beep9.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="EyedropperCursor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\eyedropper.cur;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Description" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>resources\description.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

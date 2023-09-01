@@ -251,5 +251,14 @@ namespace MGT.Cardia {
                 return ResourceManager.GetString("Description", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream EyedropperCursor {
+            get {
+                return ResourceManager.GetStream("EyedropperCursor", resourceCulture);
+            }
+        }
     }
 }
