@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Resources;
 using System.Windows.Forms;
+using Windows.UI.Composition;
 
 namespace MGT.Cardia
 {
@@ -630,7 +631,7 @@ namespace MGT.Cardia
         {
             Point cursor;
 
-            cursor = MousePosition;
+            cursor = Cursor.Position;
             cursor.X -= this.SnapshotImage.Width / 2;
             cursor.Y -= this.SnapshotImage.Height / 2;
 

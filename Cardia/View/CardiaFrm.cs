@@ -50,6 +50,7 @@ namespace MGT.Cardia
             cardia.PlayAlarmChanged += cardia_PlayAlarmChanged;
             cardia.WidthChanged += cardia_WidthChanged;
             cardia.LocationChanged += cardia_LocationChanged;
+            screenColorPicker1.ColorChanged += ScreenColorPicker1_ColorChanged;
 
             cardia.Started += cardia_Started;
             cardia.Stopped += cardia_Stopped;
@@ -260,6 +261,11 @@ namespace MGT.Cardia
         #endregion
 
         #region UI event handlers & helpers
+
+        private void ScreenColorPicker1_ColorChanged(object sender, EventArgs e)
+        {
+            cardia.Color = (sender as ScreenColorPicker).Color;
+        }
 
         private void miDevicesItem_Clicked(object sender, EventArgs e)
         {
